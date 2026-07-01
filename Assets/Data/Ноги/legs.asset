@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 416a29db0fc6dae4da55e294dc8bab38, type: 3}
+  m_Name: legs
+  m_EditorClassIdentifier: Assembly-CSharp::BodyPartDefinitionSO
+  partId: legs
+  displayName: "\u041D\u043E\u0433\u0438"
+  baseSprite: {fileID: 21300000, guid: f87d3bb155110844e8ff6498467f5b1b, type: 3}
+  milestoneVariants:
+  - {fileID: 11400000, guid: 56a2afcf665ed9440a5045733bacd7aa, type: 2}
+  - {fileID: 11400000, guid: cef0977ee7a2e35439f7cfdad12572ca, type: 2}
+  - {fileID: 11400000, guid: e262daf034c29a5468f804c0e350cdba, type: 2}
+  - {fileID: 11400000, guid: d0219531221891a43943e2d4a91d0c95, type: 2}
+  - {fileID: 11400000, guid: 1ce298a23eb154f40861fa5b53f41cc7, type: 2}
+  - {fileID: 11400000, guid: 82e1611ded05e6347adb884ea3b8243d, type: 2}
+  - {fileID: 11400000, guid: 0de1dbf95da233b40919d90958428cd3, type: 2}
+  - {fileID: 11400000, guid: a6f540da357d1354684cd9e5c61649d1, type: 2}

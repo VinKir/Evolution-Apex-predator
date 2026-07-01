@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 416a29db0fc6dae4da55e294dc8bab38, type: 3}
+  m_Name: jaws
+  m_EditorClassIdentifier: Assembly-CSharp::BodyPartDefinitionSO
+  partId: jaws
+  displayName: "\u041C\u0430\u043D\u0434\u0438\u0431\u0443\u043B\u044B"
+  baseSprite: {fileID: 21300000, guid: a2fc6494c7a35c140b1188466ff7339f, type: 3}
+  milestoneVariants:
+  - {fileID: 11400000, guid: a13a1f0845133f14a88b95f8f06fa493, type: 2}
+  - {fileID: 11400000, guid: a62097ce6e27a914280b7fc1e22be5dc, type: 2}
+  - {fileID: 11400000, guid: de113d1ab7dcef54c9a50fe865a2824a, type: 2}
+  - {fileID: 11400000, guid: 7f6b07ef1b2635d4183e8716af3972f1, type: 2}
+  - {fileID: 11400000, guid: d396577303e965f45aff53c92b5bd21a, type: 2}
+  - {fileID: 11400000, guid: b8701f764635b7448a7cfea58d0bad5c, type: 2}
+  - {fileID: 11400000, guid: 7df77d10f476fb344ba3d437a0533516, type: 2}
+  - {fileID: 11400000, guid: c5ecd2cffd3b1694b83b2f1ec19aca50, type: 2}
+  - {fileID: 11400000, guid: 9d04376f55a9ba744897a18af0690eba, type: 2}
+  - {fileID: 11400000, guid: b6113693d10f36e4d8e467ab62e61c8d, type: 2}
+  - {fileID: 11400000, guid: d40392a09549abb46b20748a8d6874f4, type: 2}
