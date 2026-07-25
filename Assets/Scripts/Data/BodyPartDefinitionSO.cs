@@ -5,12 +5,12 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Evolution/Body Part Definition", fileName = "BodyPartDefinition")]
 public class BodyPartDefinitionSO : ScriptableObject
 {
-    public string partId = "chitin"; // заменять partId не нужно, так как в будущем могут появиться одинаковые части тела, типа Железа 1, Железа 2
+    public string partId = "chitin"; // Р—Р°РјРµРЅСЏС‚СЊ partId РЅРµ РЅСѓР¶РЅРѕ, С‚Р°Рє РєР°Рє РІ Р±СѓРґСѓС‰РµРј РјРѕРіСѓС‚ РїРѕСЏРІРёС‚СЊСЃСЏ РѕРґРёРЅР°РєРѕРІС‹Рµ С‡Р°СЃС‚Рё С‚РµР»Р°, С‚РёРїР° Р–РµР»РµР·Р° 1, Р–РµР»РµР·Р° 2
     public BodyPartType partType = BodyPartType.Chitin;
-    public string displayName = "Хитин";
+    public string displayName = "пїЅпїЅпїЅпїЅпїЅ";
     public Sprite baseSprite;
 
-    [Tooltip("Список вариантов для каждого 5-го уровня.")]
+    [Tooltip("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 5-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.")]
     public List<BodyPartVariantSO> milestoneVariants = new();
 
     public List<BodyPartVariantSO> GetVariantsForLevel(int level)

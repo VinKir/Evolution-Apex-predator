@@ -17,6 +17,7 @@ public class MutationUIController : MonoBehaviour
 
     [Header("Core")]
     [SerializeField] private PlayerProgression progression;
+    [SerializeField] private OrganismCombatant playerCombatant;
     [SerializeField] private PlayerBody body;
     [SerializeField] private PlayerActionLock actionLock;
     [SerializeField] private PlayerMovementController movement;
@@ -216,7 +217,7 @@ public class MutationUIController : MonoBehaviour
 
         if (nextLevel > progression.MutationCap)
         {
-            alertPopup?.Show("Вы достигли предела мутации на текущем уровне эволюции.");
+            alertPopup?.Show("Р’С‹ РґРѕСЃС‚РёРіР»Рё РїСЂРµРґРµР»Р° РјСѓС‚Р°С†РёРё РЅР° С‚РµРєСѓС‰РµРј СѓСЂРѕРІРЅРµ СЌРІРѕР»СЋС†РёРё.");
             return;
         }
 
@@ -225,7 +226,7 @@ public class MutationUIController : MonoBehaviour
 
         if (progression.Biomass < pendingCost + nextCost)
         {
-            alertPopup?.Show("Недостаточно Очков Биомассы.");
+            alertPopup?.Show("РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РћС‡РєРѕРІ Р‘РёРѕРјР°СЃСЃС‹.");
             return;
         }
 
@@ -244,7 +245,7 @@ public class MutationUIController : MonoBehaviour
 
         if (!progression.SpendBiomass(totalCost))
         {
-            alertPopup?.Show("Недостаточно Очков Биомассы.");
+            alertPopup?.Show("РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РћС‡РєРѕРІ Р‘РёРѕРјР°СЃСЃС‹.");
             return;
         }
 
@@ -285,19 +286,19 @@ public class MutationUIController : MonoBehaviour
                 if (lvl % 5 != 0)
                     continue;
 
-                // Все варианты для этого milestone уровня
+                // Р’СЃРµ РІР°СЂРёР°РЅС‚С‹ РґР»СЏ СЌС‚РѕРіРѕ milestone СѓСЂРѕРІРЅСЏ
                 var allOptions = state.definition.GetVariantsForLevel(lvl);
 
                 if (allOptions == null || allOptions.Count == 0)
                     continue;
 
-                // Уже применённые варианты у этой части тела
+                // РЈР¶Рµ РїСЂРёРјРµРЅС‘РЅРЅС‹Рµ РІР°СЂРёР°РЅС‚С‹ Сѓ СЌС‚РѕР№ С‡Р°СЃС‚Рё С‚РµР»Р°
                 var alreadyApplied = state.appliedVariants
                     .Where(v => v != null && v.variant != null)
                     .Select(v => v.variant)
                     .ToHashSet();
 
-                // Уже выбранные в текущей очереди мутации
+                // РЈР¶Рµ РІС‹Р±СЂР°РЅРЅС‹Рµ РІ С‚РµРєСѓС‰РµР№ РѕС‡РµСЂРµРґРё РјСѓС‚Р°С†РёРё
                 var alreadyChosenThisSession = chosenVariants
                     .Where(v => v != null &&
                                 v.partId == state.definition.partId &&
@@ -305,7 +306,7 @@ public class MutationUIController : MonoBehaviour
                     .Select(v => v.variant)
                     .ToHashSet();
 
-                // Убираем повторяющиеся варианты
+                // РЈР±РёСЂР°РµРј РїРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ РІР°СЂРёР°РЅС‚С‹
                 var availableOptions = allOptions
                     .Where(v =>
                         v != null &&
@@ -313,7 +314,7 @@ public class MutationUIController : MonoBehaviour
                         !alreadyChosenThisSession.Contains(v))
                     .ToList();
 
-                // Если всё уже выбрано — пропускаем
+                // Р•СЃР»Рё РІСЃС‘ СѓР¶Рµ РІС‹Р±СЂР°РЅРѕ вЂ” РїСЂРѕРїСѓСЃРєР°РµРј
                 if (availableOptions.Count == 0)
                     continue;
 
@@ -408,6 +409,9 @@ public class MutationUIController : MonoBehaviour
 
         body.ApplyMutation(pendingLevelAdds, chosenVariants);
 
+        if (playerCombatant != null)
+            playerCombatant.RecalculateStats();
+
         worldBodyVisual?.ClearTransactionPreview();
         previewBodyVisual?.ClearTransactionPreview();
 
@@ -442,11 +446,14 @@ public class MutationUIController : MonoBehaviour
 
         if (!progression.CanEvolve)
         {
-            alertPopup?.Show("Эволюция доступна только на 5 уровне.");
+            alertPopup?.Show("Р­РІРѕР»СЋС†РёСЏ РґРѕСЃС‚СѓРїРЅР° С‚РѕР»СЊРєРѕ РЅР° РјР°РєСЃРёРјР°Р»СЊРЅРѕРј СѓСЂРѕРІРЅРµ.");
             return;
         }
 
         progression.Evolve();
+
+        if (playerCombatant != null)
+            playerCombatant.RecalculateStats();
 
         pendingLevelAdds.Clear();
         chosenVariants.Clear();

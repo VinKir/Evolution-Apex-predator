@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: chitin
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartDefinitionSO
   partId: chitin
+  partType: 0
   displayName: "\u0425\u0438\u0442\u0438\u043D"
   baseSprite: {fileID: 21300000, guid: bc698e81e285d6e42b6c06632f6b34ed, type: 3}
   milestoneVariants:
@@ -21,3 +22,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2c40746f5f22fc34bb0a0d6ea587960b, type: 2}
   - {fileID: 11400000, guid: fbd086d83c9282a43949d9029e9f24e4, type: 2}
   - {fileID: 11400000, guid: b47e71399789afd4c89496361470eca3, type: 2}
+  - {fileID: 11400000, guid: bca494b8a563a9b4ab6a48c89bd4df29, type: 2}
+  - {fileID: 11400000, guid: 90d4bf7d4724f4c40980f6a4097f77af, type: 2}

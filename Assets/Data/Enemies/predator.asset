@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34e7e59d511ba1a448efe231348cd6c8, type: 3}
+  m_Name: predator
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyTemplateSO
+  behaviorType: 1
+  prefab: {fileID: 5098495969252214907, guid: be2d76008845246e6aa027550cf0f2d4, type: 3}
+  minLevelOffset: -1
+  maxLevelOffset: 2
+  minEvolutionOffset: 0
+  maxEvolutionOffset: 1
+  baseStrengthExtMin: 0.8
+  baseStrengthExtMax: 1.4
+  baseStrengthIntMin: 0.8
+  baseStrengthIntMax: 1.4
+  baseEnduranceExtMin: 0.8
+  baseEnduranceExtMax: 1.4
+  baseEnduranceIntMin: 0.8
+  baseEnduranceIntMax: 1.4
+  baseMoveSpeedMin: 2.2
+  baseMoveSpeedMax: 4.2
+  baseTurnSpeedMin: 4
+  baseTurnSpeedMax: 8
+  baseDetectionRadiusMin: 4
+  baseDetectionRadiusMax: 7
+  corpseBiomassMultiplier: 1
+  corpseConsumeDuration: 10

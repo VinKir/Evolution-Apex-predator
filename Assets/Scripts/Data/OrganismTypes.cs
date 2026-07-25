@@ -13,8 +13,7 @@ public enum BodyHitboxSlot
     Chitin,
     Body,
     Jaws,
-    LeftLeg,
-    RightLeg
+    Legs
 }
 
 public enum EnemyBehaviorType

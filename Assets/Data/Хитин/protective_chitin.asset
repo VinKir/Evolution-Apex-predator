@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b26e01f9c320b194ebbeb77497a856f1, type: 3}
   m_Name: protective_chitin
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
-  variantId: 001008
+  variantId: 001007
   displayName: "\u041E\u0431\u0435\u0440\u0435\u0433\u0430\u044E\u0449\u0438\u0439
     \u0445\u0438\u0442\u0438\u043D"
-  unlockLevel: 8
+  unlockLevel: 5
   description: ---------------
   overlaySprite: {fileID: 21300000, guid: f13d1ac57ee657e43adf39f87ae246aa, type: 3}
   modifiers: []

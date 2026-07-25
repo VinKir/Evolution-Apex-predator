@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerProgression : MonoBehaviour
@@ -15,6 +16,8 @@ public class PlayerProgression : MonoBehaviour
     [SerializeField] private float biomass = 0f;
 
     private int LevelCap => evolutionStage * 5;
+
+    public event Action OnEvolve;
 
     public int Level => level;
     public int Experience => experience;
@@ -62,6 +65,8 @@ public class PlayerProgression : MonoBehaviour
         experience = 0;
 
         mutationCap = evolutionStage * 5;
+
+        OnEvolve?.Invoke();
     }
 
     public void AddBiomass(float amount)

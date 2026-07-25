@@ -45,8 +45,8 @@ public class BodyPartRowUI : MonoBehaviour
         if (costText != null)
         {
             costText.text = blockedByLimit
-                ? "<color=red>Предел мутации</color>"
-                : $"[Улучшить {nextCost} ОБ]";
+                ? "<color=red>РџСЂРµРґРµР» РјСѓС‚Р°С†РёРё</color>"
+                : $"[РЈР»СѓС‡С€РёС‚СЊ {nextCost} РћР‘]";
         }
 
         bool interactable = canAfford && !blockedByLimit && !isLocked;

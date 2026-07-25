@@ -7,7 +7,7 @@ public class AttackHitbox : MonoBehaviour
     [SerializeField] private Collider2D hitCollider;
     private OrganismCombatant owner;
     private bool activeSwing;
-    private readonly HashSet<int> hitTargets = new();
+    private readonly HashSet<EntityId> hitTargets = new();
 
     private void Awake()
     {
@@ -44,10 +44,10 @@ public class AttackHitbox : MonoBehaviour
         if (defender == null || defender == owner)
             return;
 
-        if (hitTargets.Contains(defender.GetInstanceID()))
+        if (hitTargets.Contains(defender.GetEntityId()))
             return;
 
-        hitTargets.Add(defender.GetInstanceID());
+        hitTargets.Add(defender.GetEntityId());
         owner.ResolveMeleeHit(defender, bodyHitbox);
     }
 }

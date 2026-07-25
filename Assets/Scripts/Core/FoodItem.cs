@@ -14,10 +14,10 @@ public class FoodItem : MonoBehaviour
     public float TotalBiomass => totalBiomass;
     public float ConsumeDuration => consumeDuration;
     public float ConsumedProgress => consumedProgress;
-    public bool IsFullyEaten => consumedProgress >= 0.999f;
+    public bool IsFullyEaten => consumedProgress >= 1f;
 
     /// <summary>
-    /// Настройка параметров при создании объекта в рантайме.
+    /// РќР°СЃС‚СЂРѕР№РєР° РїР°СЂР°РјРµС‚СЂРѕРІ РїСЂРё СЃРѕР·РґР°РЅРёРё РѕР±СЉРµРєС‚Р° РІ СЂР°РЅС‚Р°Р№РјРµ.
     /// </summary>
     public void InitializeRuntime(float biomass, float duration)
     {
@@ -27,9 +27,9 @@ public class FoodItem : MonoBehaviour
     }
 
     /// <summary>
-    /// Добавляет прогресс поедания (0..1)
-    /// и возвращает количество полученной биомассы.
-    /// Биомасса выдается по четвертям: 25%, 50%, 75%, 100%.
+    /// Р”РѕР±Р°РІР»СЏРµС‚ РїСЂРѕРіСЂРµСЃСЃ РїРѕРµРґР°РЅРёСЏ (0..1)
+    /// Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР»СѓС‡РµРЅРЅРѕР№ Р±РёРѕРјР°СЃСЃС‹.
+    /// Р‘РёРѕРјР°СЃСЃР° РІС‹РґР°РµС‚СЃСЏ РїРѕ С‡РµС‚РІРµСЂС‚СЏРј: 25%, 50%, 75%, 100%.
     /// </summary>
     public float AddProgress(float progressDelta01)
     {

@@ -144,7 +144,7 @@ public class OrganismCombatant : MonoBehaviour
 
         if (rb != null)
         {
-            float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, Stats.moveSpeed)); // TODO: ����������� �������� �� linearVelocity
+            float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, Stats.moveSpeed));
 
             if (speed01 > 0.08f)
                 SpendStamina(Stats.staminaMoveCost * speed01 * Time.deltaTime);
@@ -162,7 +162,7 @@ public class OrganismCombatant : MonoBehaviour
         if (isPlayer)
         {
             if (playerProgression != null)
-                playerProgression.OnChanged += RecalculateStats;
+                playerProgression.OnEvolve += RecalculateStats;
 
             if (playerBody != null)
                 playerBody.OnBodyChanged += RecalculateStats;
@@ -174,7 +174,7 @@ public class OrganismCombatant : MonoBehaviour
         if (isPlayer)
         {
             if (playerProgression != null)
-                playerProgression.OnChanged -= RecalculateStats;
+                playerProgression.OnEvolve -= RecalculateStats;
 
             if (playerBody != null)
                 playerBody.OnBodyChanged -= RecalculateStats;
@@ -536,14 +536,9 @@ public class OrganismCombatant : MonoBehaviour
                 ApplyJawsDamage(slotDamage, hadChitin);
                 break;
 
-            case BodyHitboxSlot.LeftLeg:
+            case BodyHitboxSlot.Legs:
                 ApplyChitinDamage(chitinDamage, attacker);
                 ApplyLegDamage(true, slotDamage, hadChitin);
-                break;
-
-            case BodyHitboxSlot.RightLeg:
-                ApplyChitinDamage(chitinDamage, attacker);
-                ApplyLegDamage(false, slotDamage, hadChitin);
                 break;
 
             case BodyHitboxSlot.Body:
@@ -657,10 +652,7 @@ public class OrganismCombatant : MonoBehaviour
         if (IsDead)
             return;
 
-        bool noBody = CurrentBodyHp <= 0f;
-        bool noChitin = CurrentChitinHp <= 0f && CurrentBodyHp <= 0f;
-
-        if (noBody && noChitin)
+        if (CurrentBodyHp <= 0f)
             Die();
     }
 

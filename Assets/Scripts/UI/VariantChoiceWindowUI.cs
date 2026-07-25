@@ -43,10 +43,10 @@ public class VariantChoiceWindowUI : MonoBehaviour
             root.SetActive(true);
 
         if (titleText != null)
-            titleText.text = $"Выберите улучшение для {partDisplayName} (уровень {milestoneLevel})";
+            titleText.text = $"Р’С‹Р±РµСЂРёС‚Рµ СѓР»СѓС‡С€РµРЅРёРµ РґР»СЏ {partDisplayName} (СѓСЂРѕРІРµРЅСЊ {milestoneLevel})";
 
         if (infoText != null)
-            infoText.text = "Выберите вариант слева.";
+            infoText.text = "Р’С‹Р±РµСЂРёС‚Рµ РІР°СЂРёР°РЅС‚ СЃР»РµРІР°.";
 
         ClearButtons();
 
@@ -81,7 +81,7 @@ public class VariantChoiceWindowUI : MonoBehaviour
             infoText.text =
                 $"<b>{variant.displayName}</b>\n\n" +
                 $"{variant.description}\n\n" +
-                $"Открывается на уровне: {variant.unlockLevel}";
+                $"РћС‚РєСЂС‹РІР°РµС‚СЃСЏ РЅР° СѓСЂРѕРІРЅРµ: {variant.unlockLevel}";
         }
 
         if (confirmButton != null)
@@ -95,7 +95,7 @@ public class VariantChoiceWindowUI : MonoBehaviour
 
         if (confirmPopup != null)
         {
-            string msg = $"Вы хотите выбрать улучшение \"{selectedVariant.displayName}\" для {currentPartName}?";
+            string msg = $"Р’С‹ С…РѕС‚РёС‚Рµ РІС‹Р±СЂР°С‚СЊ СѓР»СѓС‡С€РµРЅРёРµ \"{selectedVariant.displayName}\" РґР»СЏ {currentPartName}?";
             confirmPopup.Show(msg, ConfirmSelection);
         }
         else

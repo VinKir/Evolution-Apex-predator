@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b26e01f9c320b194ebbeb77497a856f1, type: 3}
   m_Name: hiding_chitin
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
-  variantId: 001007
+  variantId: 001006
   displayName: "\u0421\u043A\u0440\u044B\u0432\u0430\u044E\u0449\u0438\u0439 \u0445\u0438\u0442\u0438\u043D"
   unlockLevel: 5
   description: -----
