@@ -6561,6 +6561,9 @@ MonoBehaviour:
   rb: {fileID: 1580907983}
   animator: {fileID: 1922055455}
   rotationOffset: -90
+  baseTurnSpeed: 50
+  turnSlowdownAngle: 80
+  turnSlowdownMultiplier: 0.3
 --- !u!114 &1580907980
 MonoBehaviour:
   m_ObjectHideFlags: 0

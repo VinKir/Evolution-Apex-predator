@@ -102,7 +102,7 @@ public class OrganismCombatant : MonoBehaviour
     public bool IsDead { get; private set; }
 
     public int FactionGroupId => factionGroupId;
-    public float CombatPower => Stats.attackDamage + Stats.maxBodyHp * 0.15f + Stats.maxChitinHp * 0.1f + Stats.moveSpeed * 0.5f;
+    public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + enemyLevel + enemyEvolutionStage * 10 + (playerProgression != null ? playerProgression.Level + playerProgression.EvolutionStage * 10 : 1);
 
     public event Action<OrganismCombatant> OnDamagedBy;
     public event Action OnRecalculated;
@@ -237,6 +237,7 @@ public class OrganismCombatant : MonoBehaviour
 
         OrganismRuntimeStats s = new OrganismRuntimeStats();
 
+        // TODO: значения strengthExt и т.д. должны повышаться игроком, он сам выбирает при эволюции какую характеристику увеличить
         s.strengthExt = 1.0f * levelFactor * evoFactor;
         s.strengthInt = 1.0f * levelFactor * evoFactor;
         s.enduranceExt = 1.0f * levelFactor * evoFactor;
@@ -676,8 +677,8 @@ public class OrganismCombatant : MonoBehaviour
 
     private float EstimateCorpseBiomass()
     {
-        float sum = Stats.maxBodyHp + Stats.maxChitinHp * 0.5f + Stats.maxJawHp * 0.3f + Stats.maxLegHp * 0.3f * 2f;
-        return Mathf.Max(1f, sum * corpseBiomassMultiplier * 0.05f);
+        float sum = Mathf.Pow(10, enemyEvolutionStage - 1) + enemyLevel;
+        return Mathf.Max(1f, sum * corpseBiomassMultiplier);
     }
 
     public bool CanSee(Transform target, float extraRange = 0f)
