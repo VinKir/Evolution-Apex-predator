@@ -9,6 +9,9 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Animator animator;
     [SerializeField] private float rotationOffset = -90f;
+    [SerializeField] private float baseTurnSpeed = 50f;
+    [SerializeField] private float turnSlowdownAngle = 45f;
+    [SerializeField] private float turnSlowdownMultiplier = 0.1f;
 
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
@@ -30,7 +33,6 @@ public class PlayerMovementController : MonoBehaviour
         }
 
         input = joystick.Direction;
-
         bool isMoving = input.sqrMagnitude > 0.01f;
 
         if (animator != null)
@@ -38,16 +40,53 @@ public class PlayerMovementController : MonoBehaviour
 
         if (isMoving)
         {
-            FacingDirection = input.normalized;
-            RotateToDirection(FacingDirection);
-        }
+            Vector2 moveDirection = input.normalized;
 
-        rb.linearVelocity = input * combatant.Stats.moveSpeed;
+            float angleToMove = Vector2.Angle(GetCurrentFacingDirection(), moveDirection);
+
+            float moveSpeed = combatant != null ? combatant.Stats.moveSpeed : 0f;
+            float speedMultiplier = GetMoveSpeedMultiplier(angleToMove);
+
+            RotateToDirection(moveDirection);
+
+            rb.linearVelocity = moveDirection * (moveSpeed * speedMultiplier);
+            FacingDirection = moveDirection;
+        }
+        else
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+    }
+
+    private float GetMoveSpeedMultiplier(float angleToMove)
+    {
+        if (angleToMove <= turnSlowdownAngle)
+            return 1f;
+
+        float t = Mathf.InverseLerp(turnSlowdownAngle, 180f, angleToMove);
+        return Mathf.Lerp(1f, turnSlowdownMultiplier, t);
     }
 
     private void RotateToDirection(Vector2 direction)
     {
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        rb.MoveRotation(angle + rotationOffset);
+        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + rotationOffset;
+
+        float turnSpeed = baseTurnSpeed;
+        if (combatant != null)
+            turnSpeed += combatant.Stats.turnSpeed;
+
+        float newAngle = Mathf.MoveTowardsAngle(
+            rb.rotation,
+            targetAngle,
+            turnSpeed * Time.fixedDeltaTime
+        );
+
+        rb.MoveRotation(newAngle);
+    }
+
+    private Vector2 GetCurrentFacingDirection()
+    {
+        float angle = (rb.rotation - rotationOffset) * Mathf.Deg2Rad;
+        return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).normalized;
     }
 }
