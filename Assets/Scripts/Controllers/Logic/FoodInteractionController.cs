@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class FoodInteractionController : MonoBehaviour
 {
-    [SerializeField] private PlayerMovementController movement;
+    [SerializeField] private OrganismMovementMotor movement;
     [SerializeField] private PlayerActionLock actionLock;
     [SerializeField] private PlayerProgression progression;
     [SerializeField] private PlayerWorldProgressUI worldProgressUI;

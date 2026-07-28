@@ -30,7 +30,7 @@ Transform:
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5682619519553953665}
+  m_Father: {fileID: 1346731047636213164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &9139830587492683185
 SpriteRenderer:
@@ -92,6 +92,64 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1 &697548296085945028
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1346731047636213164}
+  - component: {fileID: 1165410746487256715}
+  m_Layer: 0
+  m_Name: graphics
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1346731047636213164
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697548296085945028}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1082155506498853308}
+  - {fileID: 8085682332713163626}
+  - {fileID: 828742571543870285}
+  - {fileID: 2716906094628611196}
+  m_Father: {fileID: 5682619519553953665}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1165410746487256715
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697548296085945028}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6ffd0cf614c96ef49a12abf7ab2dfa7d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &963631722434741919
 GameObject:
   m_ObjectHideFlags: 0
@@ -206,7 +264,7 @@ Transform:
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5682619519553953665}
+  m_Father: {fileID: 1346731047636213164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7575208202041600473
 SpriteRenderer:
@@ -350,7 +408,7 @@ Transform:
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5682619519553953665}
+  m_Father: {fileID: 1346731047636213164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7082198688528441669
 SpriteRenderer:
@@ -493,7 +551,7 @@ Transform:
   m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5682619519553953665}
+  m_Father: {fileID: 1346731047636213164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3257530251873776691
 SpriteRenderer:
@@ -617,6 +675,7 @@ GameObject:
   - component: {fileID: 3261175036440709481}
   - component: {fileID: 7376604699610478457}
   - component: {fileID: 943026238583717204}
+  - component: {fileID: 4549512270699472470}
   m_Layer: 0
   m_Name: SimpleEnemy
   m_TagString: Untagged
@@ -638,10 +697,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1244826091788095709}
-  - {fileID: 1082155506498853308}
-  - {fileID: 8085682332713163626}
-  - {fileID: 828742571543870285}
-  - {fileID: 2716906094628611196}
+  - {fileID: 1346731047636213164}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &3261175036440709481
@@ -687,7 +743,7 @@ MonoBehaviour:
   factionGroupId: 1
   playerProgression: {fileID: 0}
   playerBody: {fileID: 0}
-  enemyTemplate: {fileID: 0}
+  enemyTemplate: {fileID: 11400000, guid: 62fd75420fde6451283edbbfa8124416, type: 2}
   enemyLevel: 1
   enemyEvolutionStage: 1
   rb: {fileID: 3261175036440709481}
@@ -710,11 +766,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIController
   combatant: {fileID: 7376604699610478457}
-  rb: {fileID: 3261175036440709481}
+  movement: {fileID: 4549512270699472470}
   thinkInterval: 0.4
   attackRange: 1.1
   fleeHealthThreshold: 0.25
   corpseEatRange: 1
   wanderChangeInterval: 2.5
   targetReachThreshold: 1
-  baseCrawlSpeed: 0.6
+--- !u!114 &4549512270699472470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5098495969252214907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180c16eab5e8a4cd89155df9c7642192, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrganismMovementMotor
+  combatant: {fileID: 7376604699610478457}
+  rb: {fileID: 3261175036440709481}
+  animator: {fileID: 1165410746487256715}
+  rotationOffset: -90
+  baseTurnSpeed: 50
+  turnSlowdownAngle: 45
+  turnSlowdownMultiplier: 0.1
+  lowStaminaSpeedMultiplier: 0.5

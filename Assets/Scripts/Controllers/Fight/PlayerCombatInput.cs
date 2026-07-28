@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerCombatInput : MonoBehaviour
@@ -11,28 +12,52 @@ public class PlayerCombatInput : MonoBehaviour
         controls = new PlayerControls();
     }
 
+    private void Update()
+    {
+        if (!controls.Player.Attack.WasPressedThisFrame())
+            return;
+
+        if (IsPointerOverUI())
+            return;
+
+        OnAttackButton();
+    }
+
     private void OnEnable()
     {
         controls.Enable();
-
-        controls.Player.Attack.performed += OnAttack;
     }
 
     private void OnDisable()
     {
-        controls.Player.Attack.performed -= OnAttack;
-
         controls.Disable();
-    }
-
-    private void OnAttack(InputAction.CallbackContext context)
-    {
-        OnAttackButton();
     }
 
     public void OnAttackButton()
     {
         if (combatant != null)
             combatant.TryStartMeleeAttack();
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null)
+            return false;
+
+        if (Mouse.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
+            return true;
+
+        if (Touchscreen.current != null)
+        {
+            foreach (var touch in Touchscreen.current.touches)
+            {
+                if (touch.press.isPressed &&
+                    EventSystem.current.IsPointerOverGameObject(touch.touchId.ReadValue()))
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

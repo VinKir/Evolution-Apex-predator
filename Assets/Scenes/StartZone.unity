@@ -5389,7 +5389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281d6ec2dbd757b46a860bc54b721a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoodInteractionController
-  movement: {fileID: 1580907979}
+  movement: {fileID: 1580907990}
   actionLock: {fileID: 1580907980}
   progression: {fileID: 1580907981}
   worldProgressUI: {fileID: 1284898182}
@@ -6490,6 +6490,7 @@ GameObject:
   - component: {fileID: 1580907988}
   - component: {fileID: 1580907977}
   - component: {fileID: 1580907985}
+  - component: {fileID: 1580907990}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -6509,7 +6510,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281d6ec2dbd757b46a860bc54b721a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoodInteractionController
-  movement: {fileID: 1580907979}
+  movement: {fileID: 1580907990}
   actionLock: {fileID: 1580907980}
   progression: {fileID: 1580907981}
   worldProgressUI: {fileID: 1284898182}
@@ -6556,14 +6557,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementController
   actionLock: {fileID: 1580907980}
-  combatant: {fileID: 1580907988}
   joystick: {fileID: 5587321661851677052}
-  rb: {fileID: 1580907983}
-  animator: {fileID: 1922055455}
-  rotationOffset: -90
-  baseTurnSpeed: 50
-  turnSlowdownAngle: 80
-  turnSlowdownMultiplier: 0.3
+  movement: {fileID: 1580907990}
 --- !u!114 &1580907980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6634,8 +6629,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 24913642}
   - {fileID: 1247044640}
+  - {fileID: 24913642}
   - {fileID: 1922055454}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6701,6 +6696,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatInput
   combatant: {fileID: 1580907988}
+--- !u!114 &1580907990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580907976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180c16eab5e8a4cd89155df9c7642192, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrganismMovementMotor
+  combatant: {fileID: 1580907988}
+  rb: {fileID: 1580907983}
+  animator: {fileID: 1922055455}
+  rotationOffset: -90
+  baseTurnSpeed: 50
+  turnSlowdownAngle: 45
+  turnSlowdownMultiplier: 0.1
+  lowStaminaSpeedMultiplier: 0.5
 --- !u!1 &1697140479
 GameObject:
   m_ObjectHideFlags: 0
