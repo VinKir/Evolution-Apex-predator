@@ -645,7 +645,7 @@ public class OrganismCombatant : MonoBehaviour
         CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + biomass * 0.35f);
         CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + biomass * 0.35f);
         CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + biomass * 0.35f);
-        CurrentStamina = Mathf.Min(Stats.maxStamina, CurrentStamina + biomass * 2f);
+        CurrentStamina = Mathf.Min(Stats.maxStamina, CurrentStamina + biomass * 10f);
     }
 
     private void CheckDeath()
