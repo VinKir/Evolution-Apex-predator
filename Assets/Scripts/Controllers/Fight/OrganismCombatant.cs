@@ -78,6 +78,7 @@ public class OrganismCombatant : MonoBehaviour
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private Animator animator;
     [SerializeField] private AttackHitbox attackHitbox;
     [SerializeField] private FoodItem corpsePrefab;
 
@@ -116,6 +117,9 @@ public class OrganismCombatant : MonoBehaviour
     {
         if (rb == null)
             rb = GetComponent<Rigidbody2D>();
+        
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
 
         if (attackHitbox != null)
             attackHitbox.Setup(this);
@@ -447,6 +451,9 @@ public class OrganismCombatant : MonoBehaviour
     {
         attackBusy = true;
         nextAttackTime = Time.time + attackCooldown;
+
+        if (animator != null)
+            animator.SetTrigger("Attack");
 
         if (attackHitbox != null)
             attackHitbox.SetActiveSwing(false);

@@ -747,6 +747,7 @@ MonoBehaviour:
   enemyLevel: 1
   enemyEvolutionStage: 1
   rb: {fileID: 3261175036440709481}
+  animator: {fileID: 1165410746487256715}
   attackHitbox: {fileID: 6973869388676112830}
   corpsePrefab: {fileID: 2127376470273676562, guid: 70983ad1b717c684faaec7cec6d72ff3, type: 3}
   attackWindup: 0.12
@@ -768,11 +769,11 @@ MonoBehaviour:
   combatant: {fileID: 7376604699610478457}
   movement: {fileID: 4549512270699472470}
   thinkInterval: 0.4
-  attackRange: 1.1
+  attackRange: 2
   fleeHealthThreshold: 0.25
-  corpseEatRange: 1
+  corpseEatRange: 2
   wanderChangeInterval: 2.5
-  targetReachThreshold: 1
+  targetReachThreshold: 1.5
 --- !u!114 &4549512270699472470
 MonoBehaviour:
   m_ObjectHideFlags: 0
