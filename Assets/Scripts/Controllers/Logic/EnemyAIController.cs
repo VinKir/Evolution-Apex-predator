@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 public class EnemyAIController : MonoBehaviour
@@ -10,7 +9,6 @@ public class EnemyAIController : MonoBehaviour
     [Header("Brain")]
     [SerializeField] private float thinkInterval = 0.25f;
     [SerializeField] private float attackRange = 1.1f;
-    [SerializeField] private float fleeHealthThreshold = 0.25f;
     [SerializeField] private float corpseEatRange = 1.0f;
 
     [Header("Movement")]
@@ -19,14 +17,20 @@ public class EnemyAIController : MonoBehaviour
 
     public bool IsRoamingEnemy { get; private set; }
     public EnemySpawnPoint BasePoint { get; private set; }
+    public OrganismCombatant Combatant => combatant;
+    public OrganismBehaviourType BehaviourType { get; private set; } = OrganismBehaviourType.Predator;
+    public OrganismMovementMotor Movement => movement;
+    public float AttackRange => attackRange;
+    public float EatRange => corpseEatRange;
+    public float WanderChangeInterval => wanderChangeInterval;
+    public float TargetReachThreshold => targetReachThreshold;
 
     private Transform player;
     private float nextThinkTime;
-    private float nextWanderChangeTime;
-    private Vector2 wanderTarget;
-    private OrganismCombatant lastThreat;
-    private FoodItem targetCorpse;
-    private bool isFleeing;
+    private AIContext context;
+    private AIMemory memory;
+    private OrganismBrain brain;
+    private AIStateMachine stateMachine;
 
     private void Awake()
     {
@@ -35,6 +39,11 @@ public class EnemyAIController : MonoBehaviour
 
         if (combatant == null)
             combatant = GetComponent<OrganismCombatant>();
+
+        context = new AIContext();
+        memory = new AIMemory();
+        brain = new OrganismBrain();
+        stateMachine = new AIStateMachine(this, context, memory);
     }
 
     public void Initialize(Transform playerTarget, EnemySpawnPoint basePoint)
@@ -55,9 +64,8 @@ public class EnemyAIController : MonoBehaviour
 
     private void OnDamagedBy(OrganismCombatant attacker)
     {
-        lastThreat = attacker;
-        isFleeing = true;
-        targetCorpse = null;
+        memory.LastThreat = attacker;
+        memory.TimeSinceLastDamage = 0f;
     }
 
     private void Update()
@@ -68,33 +76,15 @@ public class EnemyAIController : MonoBehaviour
         if (player == null)
             return;
 
+        memory.Update(Time.deltaTime);
+
         if (Time.time >= nextThinkTime)
         {
             Think();
             nextThinkTime = Time.time + thinkInterval;
         }
 
-        if (targetCorpse != null)
-        {
-            float dist = Vector2.Distance(transform.position, targetCorpse.transform.position);
-            if (dist <= corpseEatRange)
-            {
-                float gained = targetCorpse.AddProgress(
-                    Time.deltaTime / Mathf.Max(0.01f, targetCorpse.ConsumeDuration)
-                );
-
-                if (gained > 0f)
-                    combatant.ApplyFoodGain(gained);
-
-                if (targetCorpse.IsFullyEaten)
-                    targetCorpse = null;
-
-                if (movement != null)
-                    movement.Stop();
-
-                return;
-            }
-        }
+        stateMachine.Update();
     }
 
     private void FixedUpdate()
@@ -102,180 +92,16 @@ public class EnemyAIController : MonoBehaviour
         if (movement == null || combatant == null || combatant.IsDead)
             return;
 
-        Vector2 move = Vector2.zero;
-
-        if (isFleeing && lastThreat != null && !lastThreat.IsDead)
-        {
-            move = ((Vector2)transform.position - (Vector2)lastThreat.transform.position).normalized;
-        }
-        else if (targetCorpse != null)
-        {
-            move = ((Vector2)targetCorpse.transform.position - (Vector2)transform.position).normalized;
-        }
-        else
-        {
-            move = DecideMove();
-        }
-
-        movement.SetDesiredDirection(move);
+        stateMachine.FixedUpdate();
     }
 
     private void Think()
     {
-        var nearbyOrganisms = Physics2D.OverlapCircleAll(transform.position, combatant.Stats.detectionRadius)
-            .Select(c => c.GetComponentInParent<OrganismCombatant>())
-            .Where(o => o != null && o != combatant)
-            .ToList();
+        context.UpdateFrom(this, memory);
+        memory.LastThreat = memory.LastThreat != null && !memory.LastThreat.IsDead ? memory.LastThreat : context.CurrentThreat;
 
-        var nearbyFood = Physics2D.OverlapCircleAll(transform.position, combatant.Stats.detectionRadius)
-            .Select(c => c.GetComponent<FoodItem>())
-            .Where(f => f != null && !f.IsFullyEaten)
-            .ToList();
-
-        float healthRatio = combatant.CurrentBodyHpNormalized;
-
-        if (healthRatio <= fleeHealthThreshold && lastThreat != null && !lastThreat.IsDead)
-        {
-            isFleeing = true;
-            return;
-        }
-
-        if (BasePoint != null)
-        {
-            HandleGuardianBrain(nearbyOrganisms);
-            return;
-        }
-
-        if (combatant.name.ToLower().Contains("scav"))
-        {
-            HandleScavengerBrain(nearbyFood, nearbyOrganisms);
-            return;
-        }
-
-        HandlePredatorBrain(nearbyOrganisms, nearbyFood);
-    }
-
-    private void HandleScavengerBrain(System.Collections.Generic.List<FoodItem> nearbyFood, System.Collections.Generic.List<OrganismCombatant> nearbyOrganisms)
-    {
-        if (lastThreat != null && !lastThreat.IsDead)
-        {
-            isFleeing = true;
-            return;
-        }
-
-        targetCorpse = nearbyFood
-            .OrderBy(f => Vector2.Distance(transform.position, f.transform.position))
-            .FirstOrDefault();
-
-        if (targetCorpse != null)
-            isFleeing = false;
-    }
-
-    private void HandlePredatorBrain(System.Collections.Generic.List<OrganismCombatant> nearbyOrganisms, System.Collections.Generic.List<FoodItem> nearbyFood)
-    {
-        if (lastThreat != null && !lastThreat.IsDead &&
-            lastThreat.CombatPower > combatant.CombatPower * 1.1f &&
-            combatant.CurrentBodyHpNormalized < 0.35f)
-        {
-            isFleeing = true;
-            return;
-        }
-
-        isFleeing = false;
-        targetCorpse = null;
-
-        var prey = nearbyOrganisms
-            .Where(o => !combatant.IsFriendlyTo(o) && o.CombatPower < combatant.CombatPower * 1.1f)
-            .OrderBy(o => Vector2.Distance(transform.position, o.transform.position))
-            .FirstOrDefault();
-
-        if (prey != null)
-        {
-            float dist = Vector2.Distance(transform.position, prey.transform.position);
-            if (dist <= attackRange)
-                combatant.TryStartMeleeAttack();
-
-            wanderTarget = prey.transform.position;
-            return;
-        }
-
-        var corpse = nearbyFood
-            .OrderBy(f => Vector2.Distance(transform.position, f.transform.position))
-            .FirstOrDefault();
-
-        if (corpse != null && combatant.CurrentBodyHpNormalized < 0.7f)
-        {
-            targetCorpse = corpse;
-            return;
-        }
-
-        if (Time.time >= nextWanderChangeTime)
-        {
-            wanderTarget = (Vector2)transform.position + Random.insideUnitCircle.normalized * Random.Range(2f, 5f);
-            nextWanderChangeTime = Time.time + wanderChangeInterval;
-        }
-    }
-
-    private void HandleGuardianBrain(System.Collections.Generic.List<OrganismCombatant> nearbyOrganisms)
-    {
-        isFleeing = false;
-        targetCorpse = null;
-
-        if (BasePoint == null)
-            return;
-
-        float baseDistance = Vector2.Distance(transform.position, BasePoint.transform.position);
-
-        var hostile = nearbyOrganisms
-            .Where(o => !combatant.IsFriendlyTo(o))
-            .OrderBy(o => Vector2.Distance(transform.position, o.transform.position))
-            .FirstOrDefault();
-
-        if (hostile != null)
-        {
-            float dist = Vector2.Distance(transform.position, hostile.transform.position);
-            if (dist <= attackRange)
-                combatant.TryStartMeleeAttack();
-
-            wanderTarget = hostile.transform.position;
-            return;
-        }
-
-        if (baseDistance > BasePoint.activationRadius * 0.8f)
-            wanderTarget = BasePoint.transform.position;
-    }
-
-    private Vector2 DecideMove()
-    {
-        if (BasePoint != null)
-        {
-            float dist = Vector2.Distance(transform.position, BasePoint.transform.position);
-            if (dist > BasePoint.activationRadius)
-                return ((Vector2)BasePoint.transform.position - (Vector2)transform.position).normalized;
-        }
-
-        if (targetCorpse != null)
-        {
-            Vector2 dir = (Vector2)targetCorpse.transform.position - (Vector2)transform.position;
-            if (dir.magnitude <= targetReachThreshold)
-                return Vector2.zero;
-
-            return dir.normalized;
-        }
-
-        if (wanderTarget != Vector2.zero)
-        {
-            Vector2 dir = wanderTarget - (Vector2)transform.position;
-            if (dir.magnitude <= targetReachThreshold)
-            {
-                wanderTarget = Vector2.zero;
-                return Vector2.zero;
-            }
-
-            return dir.normalized;
-        }
-
-        return Vector2.zero;
+        var nextState = brain.DecideState(context, memory);
+        stateMachine.ChangeState(nextState);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -284,7 +110,10 @@ public class EnemyAIController : MonoBehaviour
         {
             var attacker = hitbox.GetComponentInParent<OrganismCombatant>();
             if (attacker != null && !combatant.IsFriendlyTo(attacker))
-                lastThreat = attacker;
+            {
+                memory.LastThreat = attacker;
+                memory.TimeSinceLastDamage = 0f;
+            }
         }
     }
 }
