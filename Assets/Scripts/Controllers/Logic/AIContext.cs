@@ -8,6 +8,7 @@ public class AIContext
     public OrganismCombatant Combatant { get; set; }
     public OrganismMovementMotor Movement { get; set; }
     public EnemySpawnPoint HomePoint { get; set; }
+    public OrganismBehaviourType BehaviourType { get; set; }
 
     public Vector2 CurrentPosition { get; set; }
     public float CurrentHp { get; set; }
@@ -69,6 +70,7 @@ public class AIContext
         Combatant = owner.Combatant;
         Movement = owner.Movement;
         HomePoint = owner.BasePoint;
+        BehaviourType = owner.BehaviourType;
 
         if (Combatant == null)
             return;
@@ -117,28 +119,13 @@ public class AIContext
                 VisibleFood.Add(food);
         }
 
+        CurrentThreat = SelectThreat(memory, owner);
+        CurrentTarget = SelectTarget(memory);
+        DistanceToEnemy = CurrentTarget == null ? 999f : Vector2.Distance(CurrentPosition, CurrentTarget.transform.position);
+
         NearestEnemy = GetNearestVisibleEnemy();
         NearestFood = GetNearestVisibleFood();
         NearestAlly = GetNearestVisibleAlly();
-
-        if (VisibleEnemies.Count > 0)
-        {
-            CurrentThreat = CurrentThreat != null && VisibleEnemies.Contains(CurrentThreat)
-                ? CurrentThreat
-                : NearestEnemy;
-
-            CurrentTarget = CurrentTarget != null && VisibleEnemies.Contains(CurrentTarget)
-                ? CurrentTarget
-                : NearestEnemy;
-
-            DistanceToEnemy = CurrentTarget == null ? 999f : Vector2.Distance(CurrentPosition, CurrentTarget.transform.position);
-        }
-        else
-        {
-            CurrentThreat = memory != null ? memory.LastThreat : null;
-            CurrentTarget = memory != null ? memory.CurrentTarget : null;
-            DistanceToEnemy = CurrentTarget == null ? 999f : Vector2.Distance(CurrentPosition, CurrentTarget.transform.position);
-        }
 
         if (NearestFood != null)
         {
@@ -158,6 +145,41 @@ public class AIContext
         IsHungry = HealthRatio < 0.7f;
         IsLowHealth = HealthRatio < 0.35f;
         IsLowStamina = StaminaRatio < 0.25f;
+    }
+
+    private OrganismCombatant SelectThreat(AIMemory memory, EnemyAIController owner)
+    {
+        if (owner == null || Combatant == null)
+            return null;
+
+        var visibleThreats = VisibleEnemies
+            .Where(o => o != null && !o.IsDead)
+            .ToList();
+
+        if (visibleThreats.Count == 0)
+            return memory != null ? memory.LastThreat : null;
+
+        var preferred = visibleThreats
+            .OrderBy(o => Vector2.Distance(CurrentPosition, o.transform.position))
+            .FirstOrDefault();
+
+        return preferred;
+    }
+
+    private OrganismCombatant SelectTarget(AIMemory memory)
+    {
+        if (Combatant == null)
+            return null;
+
+        if (VisibleEnemies.Count > 0)
+        {
+            return VisibleEnemies
+                .Where(o => o != null && !o.IsDead)
+                .OrderBy(o => Vector2.Distance(CurrentPosition, o.transform.position))
+                .FirstOrDefault();
+        }
+
+        return memory != null ? memory.CurrentTarget : null;
     }
 
     private OrganismCombatant GetNearestVisibleEnemy()

@@ -5,6 +5,7 @@ public class EnemyAIController : MonoBehaviour
     [Header("Core")]
     [SerializeField] private OrganismCombatant combatant;
     [SerializeField] private OrganismMovementMotor movement;
+    [SerializeField] private OrganismBehaviourType behaviourType = OrganismBehaviourType.Predator;
 
     [Header("Brain")]
     [SerializeField] private float thinkInterval = 0.25f;
@@ -18,8 +19,8 @@ public class EnemyAIController : MonoBehaviour
     public bool IsRoamingEnemy { get; private set; }
     public EnemySpawnPoint BasePoint { get; private set; }
     public OrganismCombatant Combatant => combatant;
-    public OrganismBehaviourType BehaviourType { get; private set; } = OrganismBehaviourType.Predator;
     public OrganismMovementMotor Movement => movement;
+    public OrganismBehaviourType BehaviourType => behaviourType;
     public float AttackRange => attackRange;
     public float EatRange => corpseEatRange;
     public float WanderChangeInterval => wanderChangeInterval;

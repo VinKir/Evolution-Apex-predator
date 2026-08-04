@@ -24,7 +24,13 @@ public class AINeeds
         if (context == null)
             return false;
 
-        return context.HasThreat && context.CurrentThreat != null && context.IsLowHealth;
+        if (!context.HasThreat || context.CurrentThreat == null)
+            return false;
+
+        if (context.IsLowHealth)
+            return true;
+
+        return IsStrongerThan(context.CurrentThreat, context.Combatant, 0.4f) == false;
     }
 
     public bool NeedFight(AIContext context)
@@ -32,7 +38,18 @@ public class AINeeds
         if (context == null)
             return false;
 
-        return context.CanAttack && context.CurrentTarget != null;
+        if (context.CanAttack && context.CurrentTarget != null)
+            return true;
+
+        if (context.HasThreat && context.CurrentThreat != null)
+        {
+            if (IsStrongerThan(context.CurrentThreat, context.Combatant, 0.4f))
+                return false;
+
+            return true;
+        }
+
+        return false;
     }
 
     public bool NeedSleep(AIContext context)
@@ -41,5 +58,13 @@ public class AINeeds
             return false;
 
         return context.StaminaRatio < 0.15f && context.HasThreat == false;
+    }
+
+    public bool IsStrongerThan(OrganismCombatant candidate, OrganismCombatant self, float margin)
+    {
+        if (candidate == null || self == null)
+            return false;
+
+        return candidate.CombatPower >= self.CombatPower * (1f + margin);
     }
 }
