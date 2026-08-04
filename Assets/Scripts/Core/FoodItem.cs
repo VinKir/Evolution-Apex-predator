@@ -16,9 +16,6 @@ public class FoodItem : MonoBehaviour
     public float ConsumedProgress => consumedProgress;
     public bool IsFullyEaten => consumedProgress >= 1f;
 
-    /// <summary>
-    /// Настройка параметров при создании объекта в рантайме.
-    /// </summary>
     public void InitializeRuntime(float biomass, float duration)
     {
         totalBiomass = Mathf.Max(0.01f, biomass);
@@ -30,6 +27,7 @@ public class FoodItem : MonoBehaviour
     /// Добавляет прогресс поедания (0..1)
     /// и возвращает количество полученной биомассы.
     /// Биомасса выдается по четвертям: 25%, 50%, 75%, 100%.
+    /// Если еда полностью съедена — уничтожает себя.
     /// </summary>
     public float AddProgress(float progressDelta01)
     {
@@ -44,6 +42,11 @@ public class FoodItem : MonoBehaviour
 
         float gainedBiomass =
             Mathf.Max(0, afterQuarter - beforeQuarter) * (totalBiomass / 4f);
+
+        if (IsFullyEaten)
+            Destroy(gameObject);
+        
+        Debug.Log(consumedProgress + " " + (consumedProgress >= 1f).ToString());
 
         return gainedBiomass;
     }

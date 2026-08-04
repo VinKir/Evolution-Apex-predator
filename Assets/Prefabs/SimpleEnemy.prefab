@@ -768,10 +768,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAIController
   combatant: {fileID: 7376604699610478457}
   movement: {fileID: 4549512270699472470}
+  behaviourType: 1
   thinkInterval: 0.4
   attackRange: 2
-  fleeHealthThreshold: 0.25
-  corpseEatRange: 2
+  corpseEatRange: 2.4
   wanderChangeInterval: 2.5
   targetReachThreshold: 1.5
 --- !u!114 &4549512270699472470

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e7e59d511ba1a448efe231348cd6c8, type: 3}
   m_Name: scavender
   m_EditorClassIdentifier: Assembly-CSharp::EnemyTemplateSO
-  behaviorType: 1
-  prefab: {fileID: 5098495969252214907, guid: be2d76008845246e6aa027550cf0f2d4, type: 3}
+  behaviorType: 0
+  prefab: {fileID: 4564201925503750349, guid: b4db0f6a8720a415dac8f2133aacde56, type: 3}
   minLevelOffset: -1
   maxLevelOffset: 2
   minEvolutionOffset: 0
@@ -33,4 +33,4 @@ MonoBehaviour:
   baseDetectionRadiusMin: 4
   baseDetectionRadiusMax: 7
   corpseBiomassMultiplier: 1
-  corpseConsumeDuration: 10
+  corpseConsumeDuration: 3

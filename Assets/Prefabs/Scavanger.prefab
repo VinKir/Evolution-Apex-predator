@@ -402,7 +402,7 @@ MonoBehaviour:
   behaviourType: 0
   thinkInterval: 1
   attackRange: 2
-  corpseEatRange: 2
+  corpseEatRange: 2.4
   wanderChangeInterval: 2.5
   targetReachThreshold: 1.5
 --- !u!114 &4764768291028013916

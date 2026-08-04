@@ -102,14 +102,13 @@ public class FoodInteractionController : MonoBehaviour
         if (gained > 0f && progression != null)
             progression.AddBiomass(gained);
 
-        worldProgressUI?.SetEatProgress(currentFood.ConsumedProgress, true);
-
-        if (currentFood.IsFullyEaten)
+        if (currentFood == null)
         {
             StopEating(true);
-            Destroy(currentFood.gameObject);
-            currentFood = null;
+            return;
         }
+
+        worldProgressUI?.SetEatProgress(currentFood.ConsumedProgress, true);
     }
 
     private void StopEating(bool consumedCompleted)
