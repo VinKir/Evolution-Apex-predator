@@ -12,7 +12,7 @@ public class OrganismBrain
 
         if (context.BehaviourType == OrganismBehaviourType.Scavenger)
         {
-            if (IsDirectlyThreatened(context, memory))
+            if (ownerWasAttacked(context, memory))
                 return AIStateType.Flee;
 
             if (context.NearestFood != null)
@@ -69,14 +69,6 @@ public class OrganismBrain
         if (context == null || memory == null)
             return false;
 
-        return memory.LastThreat != null && !memory.LastThreat.IsDead && context.HasThreat;
-    }
-
-    private bool IsDirectlyThreatened(AIContext context, AIMemory memory)
-    {
-        if (context == null || memory == null)
-            return false;
-
-        return ownerWasAttacked(context, memory);
+        return memory.LastAttacker != null && !memory.LastAttacker.IsDead;
     }
 }

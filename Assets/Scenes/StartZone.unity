@@ -6166,14 +6166,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   player: {fileID: 1580907984}
-  scavengerTemplates: []
+  scavengerTemplates:
+  - {fileID: 11400000, guid: c3120f07cc8b94c27aa0d60b2fca3f6d, type: 2}
   predatorTemplates:
   - {fileID: 11400000, guid: 62fd75420fde6451283edbbfa8124416, type: 2}
   guardianTemplates: []
   spawnPoints:
   - {fileID: 343063733}
   roamSpawnInterval: 8
-  maxRoamingEnemies: 1
+  maxRoamingEnemies: 2
   roamMinSpawnDistance: 12
   roamMaxSpawnDistance: 24
   despawnDistance: 45

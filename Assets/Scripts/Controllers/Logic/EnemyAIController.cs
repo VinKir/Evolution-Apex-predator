@@ -65,6 +65,7 @@ public class EnemyAIController : MonoBehaviour
 
     private void OnDamagedBy(OrganismCombatant attacker)
     {
+        memory.LastAttacker = attacker;
         memory.LastThreat = attacker;
         memory.TimeSinceLastDamage = 0f;
     }
@@ -99,7 +100,11 @@ public class EnemyAIController : MonoBehaviour
     private void Think()
     {
         context.UpdateFrom(this, memory);
-        memory.LastThreat = memory.LastThreat != null && !memory.LastThreat.IsDead ? memory.LastThreat : context.CurrentThreat;
+
+        if (memory.LastAttacker != null && !memory.LastAttacker.IsDead)
+            memory.LastThreat = memory.LastAttacker;
+        else
+            memory.LastThreat = context.CurrentThreat;
 
         var nextState = brain.DecideState(context, memory);
         stateMachine.ChangeState(nextState);
@@ -112,6 +117,7 @@ public class EnemyAIController : MonoBehaviour
             var attacker = hitbox.GetComponentInParent<OrganismCombatant>();
             if (attacker != null && !combatant.IsFriendlyTo(attacker))
             {
+                memory.LastAttacker = attacker;
                 memory.LastThreat = attacker;
                 memory.TimeSinceLastDamage = 0f;
             }

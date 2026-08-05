@@ -123,6 +123,12 @@ public class AIContext
         CurrentTarget = SelectTarget(memory);
         DistanceToEnemy = CurrentTarget == null ? 999f : Vector2.Distance(CurrentPosition, CurrentTarget.transform.position);
 
+        if (memory != null && memory.LastAttacker != null && !memory.LastAttacker.IsDead)
+        {
+            CurrentThreat = memory.LastAttacker;
+            HasThreat = true;
+        }
+
         NearestEnemy = GetNearestVisibleEnemy();
         NearestFood = GetNearestVisibleFood();
         NearestAlly = GetNearestVisibleAlly();
@@ -157,7 +163,7 @@ public class AIContext
             .ToList();
 
         if (visibleThreats.Count == 0)
-            return memory != null ? memory.LastThreat : null;
+            return null;
 
         var preferred = visibleThreats
             .OrderBy(o => Vector2.Distance(CurrentPosition, o.transform.position))
