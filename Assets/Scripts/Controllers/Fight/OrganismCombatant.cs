@@ -56,9 +56,10 @@ public struct OrganismRuntimeStats
     public float lifestealPercent;
     public float reflectPercent;
 
-    public bool jawsRegrow;
-    public bool legsRegrow;
-    public bool chitinRegrow;
+    // percent (0..1) chance/amount to which part will be restored by regrow ability
+    public float jawsRegrowPercent;
+    public float legsRegrowPercent;
+    public float chitinRegrowPercent;
 }
 
 public class OrganismCombatant : MonoBehaviour
@@ -81,6 +82,8 @@ public class OrganismCombatant : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private AttackHitbox attackHitbox;
     [SerializeField] private FoodItem corpsePrefab;
+    [Header("Visuals")]
+    [SerializeField] private Transform graphicsRoot;
 
     [Header("Attack")]
     [SerializeField] private float attackWindup = 0.12f;
@@ -112,6 +115,23 @@ public class OrganismCombatant : MonoBehaviour
     private bool attackBusy;
     private float nextAttackTime;
     private readonly List<Coroutine> runningCoroutines = new();
+    private bool statsInitialized = false;
+
+    // Visual part roots and disabled flags
+    private Transform graphicsChitin;
+    private Transform graphicsJaws;
+    private Transform graphicsLegs;
+
+    private bool chitinDisabled = false;
+    private bool jawsDisabled = false;
+    private bool legsDisabled = false;
+
+    private float lastRegrowChitinTime = -9999f;
+    private float lastRegrowJawsTime = -9999f;
+    private float lastRegrowLegsTime = -9999f;
+
+    [Header("Regrow")]
+    [SerializeField] private float baseRegrowCooldown = 60f;
 
     private void Awake()
     {
@@ -126,6 +146,19 @@ public class OrganismCombatant : MonoBehaviour
 
         HookSources();
         RecalculateStats();
+
+        // find graphics parts under graphicsRoot if available
+        if (graphicsRoot == null)
+        {
+            graphicsRoot = transform.Find("graphics") ?? transform.Find("Graphics");
+        }
+
+        if (graphicsRoot != null)
+        {
+            graphicsChitin = graphicsRoot.Find("chitin") ?? graphicsRoot.Find("Chitin");
+            graphicsJaws = graphicsRoot.Find("jaws") ?? graphicsRoot.Find("Jaws");
+            graphicsLegs = graphicsRoot.Find("legs") ?? graphicsRoot.Find("Legs");
+        }
     }
 
     private void OnEnable()
@@ -146,9 +179,21 @@ public class OrganismCombatant : MonoBehaviour
 
         Regenerate(Time.deltaTime);
 
+        // bots auto-trigger regrow if available and off-cooldown
+        if (!isPlayer)
+        {
+            if (jawsDisabled && Time.time - lastRegrowJawsTime >= GetRegrowCooldown(Stats.jawsRegrowPercent) && Stats.jawsRegrowPercent > 0f)
+                TryRegrowPart(BodyPartType.Jaws);
+            if (legsDisabled && Time.time - lastRegrowLegsTime >= GetRegrowCooldown(Stats.legsRegrowPercent) && Stats.legsRegrowPercent > 0f)
+                TryRegrowPart(BodyPartType.Legs);
+            if (chitinDisabled && Time.time - lastRegrowChitinTime >= GetRegrowCooldown(Stats.chitinRegrowPercent) && Stats.chitinRegrowPercent > 0f)
+                TryRegrowPart(BodyPartType.Chitin);
+        }
+
         if (rb != null)
         {
-            float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, Stats.moveSpeed));
+            float currentMoveSpeed = Stats.moveSpeed * (legsDisabled ? 0.1f : 1f);
+            float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, currentMoveSpeed));
 
             if (speed01 > 0.08f)
                 SpendStamina(Stats.staminaMoveCost * speed01 * Time.deltaTime);
@@ -216,12 +261,17 @@ public class OrganismCombatant : MonoBehaviour
         CurrentRightLegHp = Mathf.Clamp(Stats.maxLegHp * oldLegRRatio, 0f, Stats.maxLegHp);
         CurrentStamina = Mathf.Clamp(Stats.maxStamina * oldStaminaRatio, 0f, Stats.maxStamina);
 
-        if (CurrentChitinHp <= 0f) CurrentChitinHp = Stats.maxChitinHp;
-        if (CurrentBodyHp <= 0f) CurrentBodyHp = Stats.maxBodyHp;
-        if (CurrentJawsHp <= 0f) CurrentJawsHp = Stats.maxJawHp;
-        if (CurrentLeftLegHp <= 0f) CurrentLeftLegHp = Stats.maxLegHp;
-        if (CurrentRightLegHp <= 0f) CurrentRightLegHp = Stats.maxLegHp;
-        if (CurrentStamina <= 0f) CurrentStamina = Stats.maxStamina;
+        // On first initialization, fill HP to max. Afterwards, preserve zero HP (so broken parts stay broken).
+        if (!statsInitialized)
+        {
+            CurrentChitinHp = Mathf.Max(CurrentChitinHp, Stats.maxChitinHp);
+            CurrentBodyHp = Mathf.Max(CurrentBodyHp, Stats.maxBodyHp);
+            CurrentJawsHp = Mathf.Max(CurrentJawsHp, Stats.maxJawHp);
+            CurrentLeftLegHp = Mathf.Max(CurrentLeftLegHp, Stats.maxLegHp);
+            CurrentRightLegHp = Mathf.Max(CurrentRightLegHp, Stats.maxLegHp);
+            CurrentStamina = Mathf.Max(CurrentStamina, Stats.maxStamina);
+            statsInitialized = true;
+        }
 
         OnRecalculated?.Invoke();
     }
@@ -288,9 +338,9 @@ public class OrganismCombatant : MonoBehaviour
         s.bodyBypassBonus = bonus.bodyBypassBonus;
         s.bleedPercent = bonus.bleedPercent;
         s.lifestealPercent = bonus.lifestealPercent;
-        s.jawsRegrow = bonus.jawsRegrow;
-        s.legsRegrow = bonus.legsRegrow;
-        s.chitinRegrow = bonus.chitinRegrow;
+        s.jawsRegrowPercent = bonus.jawsRegrowPercent;
+        s.legsRegrowPercent = bonus.legsRegrowPercent;
+        s.chitinRegrowPercent = bonus.chitinRegrowPercent;
 
         return s;
     }
@@ -393,9 +443,9 @@ public class OrganismCombatant : MonoBehaviour
                         case BodyStatType.BodyRegenPerSec: b.bodyRegenPerSec += v; break;
                         case BodyStatType.AttackVsHealthyMult: b.attackVsHealthyMult = Mathf.Max(b.attackVsHealthyMult, v); break;
                         case BodyStatType.AttackVsLowMult: b.attackVsLowMult = Mathf.Max(b.attackVsLowMult, v); break;
-                        case BodyStatType.JawsRegrow: if (v > 0f) b.jawsRegrow = true; break;
-                        case BodyStatType.LegsRegrow: if (v > 0f) b.legsRegrow = true; break;
-                        case BodyStatType.ChitinRegrow: if (v > 0f) b.chitinRegrow = true; break;
+                        case BodyStatType.JawsRegrow: b.jawsRegrowPercent = Mathf.Max(b.jawsRegrowPercent, v); break;
+                        case BodyStatType.LegsRegrow: b.legsRegrowPercent = Mathf.Max(b.legsRegrowPercent, v); break;
+                        case BodyStatType.ChitinRegrow: b.chitinRegrowPercent = Mathf.Max(b.chitinRegrowPercent, v); break;
                     }
                 }
             }
@@ -427,16 +477,28 @@ public class OrganismCombatant : MonoBehaviour
 
     private void Regenerate(float dt)
     {
-        CurrentChitinHp = Mathf.Min(Stats.maxChitinHp, CurrentChitinHp + Stats.chitinRegenPerSec * dt * Stats.maxChitinHp);
+        if (!chitinDisabled)
+            CurrentChitinHp = Mathf.Min(Stats.maxChitinHp, CurrentChitinHp + Stats.chitinRegenPerSec * dt * Stats.maxChitinHp);
+
         CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + Stats.bodyRegenPerSec * dt * Stats.maxBodyHp);
-        CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + Stats.jawsRegenPerSec * dt * Stats.maxJawHp);
-        CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
-        CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
+
+        if (!jawsDisabled)
+            CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + Stats.jawsRegenPerSec * dt * Stats.maxJawHp);
+
+        if (!legsDisabled)
+        {
+            CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
+            CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
+        }
     }
 
     public void TryStartMeleeAttack()
     {
         if (IsDead || attackBusy || Time.time < nextAttackTime)
+            return;
+
+        // cannot attack without jaws
+        if (CurrentJawsHp <= 0f)
             return;
 
         float staminaCost = Stats.staminaAttackCost;
@@ -609,6 +671,11 @@ public class OrganismCombatant : MonoBehaviour
 
         float mult = 1f + Stats.bodyDamageTakenMult;
         CurrentJawsHp = Mathf.Max(0f, CurrentJawsHp - amount * mult);
+        if (CurrentJawsHp <= 0f)
+        {
+            CurrentJawsHp = 0f;
+            DisablePart(BodyPartType.Jaws);
+        }
     }
 
     private void ApplyLegDamage(bool left, float amount, bool hadChitin)
@@ -623,6 +690,14 @@ public class OrganismCombatant : MonoBehaviour
             CurrentLeftLegHp = Mathf.Max(0f, CurrentLeftLegHp - reduced);
         else
             CurrentRightLegHp = Mathf.Max(0f, CurrentRightLegHp - reduced);
+
+        // if either leg is lost, consider all legs lost
+        if (CurrentLeftLegHp <= 0f || CurrentRightLegHp <= 0f)
+        {
+            CurrentLeftLegHp = Mathf.Max(0f, CurrentLeftLegHp);
+            CurrentRightLegHp = Mathf.Max(0f, CurrentRightLegHp);
+            DisablePart(BodyPartType.Legs);
+        }
     }
 
     public void TakeReflectedDamage(float amount)
@@ -653,6 +728,112 @@ public class OrganismCombatant : MonoBehaviour
         CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + biomass * 0.35f);
         CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + biomass * 0.35f);
         CurrentStamina = Mathf.Min(Stats.maxStamina, CurrentStamina + biomass * 10f);
+
+        // If eating restored a part from zero, re-enable it
+        if (CurrentJawsHp > 0f && jawsDisabled)
+            EnablePart(BodyPartType.Jaws);
+
+        if ((CurrentLeftLegHp > 0f && CurrentRightLegHp > 0f) && legsDisabled)
+            EnablePart(BodyPartType.Legs);
+
+        if (CurrentChitinHp > 0f && chitinDisabled)
+            EnablePart(BodyPartType.Chitin);
+    }
+
+    private void DisablePart(BodyPartType part)
+    {
+        switch (part)
+        {
+            case BodyPartType.Jaws:
+                jawsDisabled = true;
+                if (graphicsJaws != null)
+                    graphicsJaws.gameObject.SetActive(false);
+                break;
+            case BodyPartType.Legs:
+                legsDisabled = true;
+                if (graphicsLegs != null)
+                    graphicsLegs.gameObject.SetActive(false);
+                break;
+            case BodyPartType.Chitin:
+                chitinDisabled = true;
+                if (graphicsChitin != null)
+                    graphicsChitin.gameObject.SetActive(false);
+                break;
+        }
+    }
+
+    private void EnablePart(BodyPartType part)
+    {
+        switch (part)
+        {
+            case BodyPartType.Jaws:
+                jawsDisabled = false;
+                if (graphicsJaws != null)
+                    graphicsJaws.gameObject.SetActive(true);
+                lastRegrowJawsTime = Time.time;
+                break;
+            case BodyPartType.Legs:
+                legsDisabled = false;
+                if (graphicsLegs != null)
+                    graphicsLegs.gameObject.SetActive(true);
+                lastRegrowLegsTime = Time.time;
+                break;
+            case BodyPartType.Chitin:
+                chitinDisabled = false;
+                if (graphicsChitin != null)
+                    graphicsChitin.gameObject.SetActive(true);
+                lastRegrowChitinTime = Time.time;
+                break;
+        }
+    }
+
+    public bool TryRegrowPart(BodyPartType part)
+    {
+        float percent = 0f;
+        float maxHp = 0f;
+
+        switch (part)
+        {
+            case BodyPartType.Jaws: percent = Stats.jawsRegrowPercent; maxHp = Stats.maxJawHp; break;
+            case BodyPartType.Legs: percent = Stats.legsRegrowPercent; maxHp = Stats.maxLegHp; break;
+            case BodyPartType.Chitin: percent = Stats.chitinRegrowPercent; maxHp = Stats.maxChitinHp; break;
+            default: return false;
+        }
+
+        if (percent <= 0f)
+            return false;
+
+        float cooldown = GetRegrowCooldown(percent);
+        float last = part == BodyPartType.Jaws ? lastRegrowJawsTime : part == BodyPartType.Legs ? lastRegrowLegsTime : lastRegrowChitinTime;
+        if (Time.time - last < cooldown)
+            return false;
+
+        // restore to at least percent of max HP
+        if (part == BodyPartType.Jaws)
+            CurrentJawsHp = Mathf.Max(CurrentJawsHp, maxHp * percent);
+        else if (part == BodyPartType.Legs)
+        {
+            CurrentLeftLegHp = Mathf.Max(CurrentLeftLegHp, maxHp * percent);
+            CurrentRightLegHp = Mathf.Max(CurrentRightLegHp, maxHp * percent);
+        }
+        else if (part == BodyPartType.Chitin)
+            CurrentChitinHp = Mathf.Max(CurrentChitinHp, maxHp * percent);
+
+        EnablePart(part);
+
+        if (part == BodyPartType.Jaws) lastRegrowJawsTime = Time.time;
+        if (part == BodyPartType.Legs) lastRegrowLegsTime = Time.time;
+        if (part == BodyPartType.Chitin) lastRegrowChitinTime = Time.time;
+
+        return true;
+    }
+
+    private float GetRegrowCooldown(float percent)
+    {
+        // cooldown reduces with better regrow percent; clamp to reasonable bounds
+        float t = Mathf.Clamp01(percent);
+        float cooldown = baseRegrowCooldown * (1f - 0.6f * t); // up to 60% cooldown reduction
+        return Mathf.Max(5f, cooldown);
     }
 
     private void CheckDeath()
