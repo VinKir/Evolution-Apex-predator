@@ -381,6 +381,7 @@ MonoBehaviour:
   animator: {fileID: 119191974243092597}
   attackHitbox: {fileID: 7383954650794175755}
   corpsePrefab: {fileID: 2127376470273676562, guid: 70983ad1b717c684faaec7cec6d72ff3, type: 3}
+  graphicsRoot: {fileID: 120948740047802743}
   attackWindup: 0.12
   attackActiveTime: 0.18
   attackCooldown: 0.55

@@ -64,6 +64,28 @@ public class OrganismBrain
         return AIStateType.Wander;
     }
 
+    /// <summary>
+    /// Attempts to regrow disabled body parts.
+    /// Should be called regularly from EnemyAIController's Think() or Update() loop.
+    /// </summary>
+    public void TryRegrowParts(AIContext context, AIMemory memory)
+    {
+        if (context?.Combatant == null || context.Combatant.IsDead)
+            return;
+
+        var combatant = context.Combatant;
+
+        // Try to regrow each body part if it's disabled and ready
+        if (combatant.CanRegrowPart(BodyPartType.Jaws) && combatant.GetRegrowCooldownRemaining(BodyPartType.Jaws) <= 0f)
+            combatant.TryRegrowPart(BodyPartType.Jaws);
+
+        if (combatant.CanRegrowPart(BodyPartType.Legs) && combatant.GetRegrowCooldownRemaining(BodyPartType.Legs) <= 0f)
+            combatant.TryRegrowPart(BodyPartType.Legs);
+
+        if (combatant.CanRegrowPart(BodyPartType.Chitin) && combatant.GetRegrowCooldownRemaining(BodyPartType.Chitin) <= 0f)
+            combatant.TryRegrowPart(BodyPartType.Chitin);
+    }
+
     private bool ownerWasAttacked(AIContext context, AIMemory memory)
     {
         if (context == null || memory == null)

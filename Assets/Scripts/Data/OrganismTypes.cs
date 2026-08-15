@@ -51,7 +51,10 @@ public enum BodyStatType
     AttackVsLowMult,
     JawsRegrow,
     LegsRegrow,
-    ChitinRegrow
+    ChitinRegrow,
+    JawsRegrowCooldownReduction,
+    LegsRegrowCooldownReduction,
+    ChitinRegrowCooldownReduction
 }
 
 [Serializable]
@@ -95,4 +98,8 @@ public struct CombatBonusAccumulator
     public float jawsRegrowPercent;
     public float legsRegrowPercent;
     public float chitinRegrowPercent;
+    // Cooldown reduction in seconds (applied to base 180s cooldown)
+    public float jawsRegrowCooldownReduction;
+    public float legsRegrowCooldownReduction;
+    public float chitinRegrowCooldownReduction;
 }

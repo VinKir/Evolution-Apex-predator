@@ -60,6 +60,11 @@ public struct OrganismRuntimeStats
     public float jawsRegrowPercent;
     public float legsRegrowPercent;
     public float chitinRegrowPercent;
+
+    // Cooldown for regrow abilities in seconds
+    public float jawsRegrowCooldown;
+    public float legsRegrowCooldown;
+    public float chitinRegrowCooldown;
 }
 
 public class OrganismCombatant : MonoBehaviour
@@ -130,9 +135,6 @@ public class OrganismCombatant : MonoBehaviour
     private float lastRegrowJawsTime = -9999f;
     private float lastRegrowLegsTime = -9999f;
 
-    [Header("Regrow")]
-    [SerializeField] private float baseRegrowCooldown = 60f;
-
     private void Awake()
     {
         if (rb == null)
@@ -178,17 +180,6 @@ public class OrganismCombatant : MonoBehaviour
             return;
 
         Regenerate(Time.deltaTime);
-
-        // bots auto-trigger regrow if available and off-cooldown
-        if (!isPlayer)
-        {
-            if (jawsDisabled && Time.time - lastRegrowJawsTime >= GetRegrowCooldown(Stats.jawsRegrowPercent) && Stats.jawsRegrowPercent > 0f)
-                TryRegrowPart(BodyPartType.Jaws);
-            if (legsDisabled && Time.time - lastRegrowLegsTime >= GetRegrowCooldown(Stats.legsRegrowPercent) && Stats.legsRegrowPercent > 0f)
-                TryRegrowPart(BodyPartType.Legs);
-            if (chitinDisabled && Time.time - lastRegrowChitinTime >= GetRegrowCooldown(Stats.chitinRegrowPercent) && Stats.chitinRegrowPercent > 0f)
-                TryRegrowPart(BodyPartType.Chitin);
-        }
 
         if (rb != null)
         {
@@ -342,6 +333,12 @@ public class OrganismCombatant : MonoBehaviour
         s.legsRegrowPercent = bonus.legsRegrowPercent;
         s.chitinRegrowPercent = bonus.chitinRegrowPercent;
 
+        // Regrow cooldowns: base 180 seconds, reduced by bonuses
+        const float baseRegrowCooldown = 180f;
+        s.jawsRegrowCooldown = Mathf.Max(5f, baseRegrowCooldown - bonus.jawsRegrowCooldownReduction);
+        s.legsRegrowCooldown = Mathf.Max(5f, baseRegrowCooldown - bonus.legsRegrowCooldownReduction);
+        s.chitinRegrowCooldown = Mathf.Max(5f, baseRegrowCooldown - bonus.chitinRegrowCooldownReduction);
+
         return s;
     }
 
@@ -446,6 +443,9 @@ public class OrganismCombatant : MonoBehaviour
                         case BodyStatType.JawsRegrow: b.jawsRegrowPercent = Mathf.Max(b.jawsRegrowPercent, v); break;
                         case BodyStatType.LegsRegrow: b.legsRegrowPercent = Mathf.Max(b.legsRegrowPercent, v); break;
                         case BodyStatType.ChitinRegrow: b.chitinRegrowPercent = Mathf.Max(b.chitinRegrowPercent, v); break;
+                        case BodyStatType.JawsRegrowCooldownReduction: b.jawsRegrowCooldownReduction += v; break;
+                        case BodyStatType.LegsRegrowCooldownReduction: b.legsRegrowCooldownReduction += v; break;
+                        case BodyStatType.ChitinRegrowCooldownReduction: b.chitinRegrowCooldownReduction += v; break;
                     }
                 }
             }
@@ -791,20 +791,36 @@ public class OrganismCombatant : MonoBehaviour
     {
         float percent = 0f;
         float maxHp = 0f;
+        float cooldown = 0f;
+        float last = 0f;
 
         switch (part)
         {
-            case BodyPartType.Jaws: percent = Stats.jawsRegrowPercent; maxHp = Stats.maxJawHp; break;
-            case BodyPartType.Legs: percent = Stats.legsRegrowPercent; maxHp = Stats.maxLegHp; break;
-            case BodyPartType.Chitin: percent = Stats.chitinRegrowPercent; maxHp = Stats.maxChitinHp; break;
-            default: return false;
+            case BodyPartType.Jaws:
+                percent = Stats.jawsRegrowPercent;
+                maxHp = Stats.maxJawHp;
+                cooldown = Stats.jawsRegrowCooldown;
+                last = lastRegrowJawsTime;
+                break;
+            case BodyPartType.Legs:
+                percent = Stats.legsRegrowPercent;
+                maxHp = Stats.maxLegHp;
+                cooldown = Stats.legsRegrowCooldown;
+                last = lastRegrowLegsTime;
+                break;
+            case BodyPartType.Chitin:
+                percent = Stats.chitinRegrowPercent;
+                maxHp = Stats.maxChitinHp;
+                cooldown = Stats.chitinRegrowCooldown;
+                last = lastRegrowChitinTime;
+                break;
+            default:
+                return false;
         }
 
         if (percent <= 0f)
             return false;
 
-        float cooldown = GetRegrowCooldown(percent);
-        float last = part == BodyPartType.Jaws ? lastRegrowJawsTime : part == BodyPartType.Legs ? lastRegrowLegsTime : lastRegrowChitinTime;
         if (Time.time - last < cooldown)
             return false;
 
@@ -828,12 +844,60 @@ public class OrganismCombatant : MonoBehaviour
         return true;
     }
 
-    private float GetRegrowCooldown(float percent)
+    /// <summary>
+    /// Checks if a body part is disabled and can potentially regrow.
+    /// </summary>
+    public bool CanRegrowPart(BodyPartType part)
     {
-        // cooldown reduces with better regrow percent; clamp to reasonable bounds
-        float t = Mathf.Clamp01(percent);
-        float cooldown = baseRegrowCooldown * (1f - 0.6f * t); // up to 60% cooldown reduction
-        return Mathf.Max(5f, cooldown);
+        if (IsDead) return false;
+
+        switch (part)
+        {
+            case BodyPartType.Jaws:
+                return jawsDisabled && Stats.jawsRegrowPercent > 0f;
+            case BodyPartType.Legs:
+                return legsDisabled && Stats.legsRegrowPercent > 0f;
+            case BodyPartType.Chitin:
+                return chitinDisabled && Stats.chitinRegrowPercent > 0f;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Returns the remaining cooldown time for a regrow ability in seconds.
+    /// Returns 0 if the ability is ready or not available.
+    /// </summary>
+    public float GetRegrowCooldownRemaining(BodyPartType part)
+    {
+        if (IsDead) return float.MaxValue;
+
+        float cooldown = 0f;
+        float last = 0f;
+
+        switch (part)
+        {
+            case BodyPartType.Jaws:
+                if (Stats.jawsRegrowPercent <= 0f) return float.MaxValue;
+                cooldown = Stats.jawsRegrowCooldown;
+                last = lastRegrowJawsTime;
+                break;
+            case BodyPartType.Legs:
+                if (Stats.legsRegrowPercent <= 0f) return float.MaxValue;
+                cooldown = Stats.legsRegrowCooldown;
+                last = lastRegrowLegsTime;
+                break;
+            case BodyPartType.Chitin:
+                if (Stats.chitinRegrowPercent <= 0f) return float.MaxValue;
+                cooldown = Stats.chitinRegrowCooldown;
+                last = lastRegrowChitinTime;
+                break;
+            default:
+                return float.MaxValue;
+        }
+
+        float remaining = cooldown - (Time.time - last);
+        return Mathf.Max(0f, remaining);
     }
 
     private void CheckDeath()
