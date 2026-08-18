@@ -19,6 +19,8 @@ public class OrganismMovementMotor : MonoBehaviour
 
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
     public Vector2 DesiredDirection { get; private set; }
+    public bool IsSelfMoving { get; private set; }
+    public float CurrentMoveSpeed { get; private set; }
 
     public bool MovementLocked { get; set; }
 
@@ -42,6 +44,22 @@ public class OrganismMovementMotor : MonoBehaviour
         DesiredDirection = direction;
     }
 
+    private float GetCurrentMoveSpeed()
+    {
+        if (combatant == null)
+            return 0f;
+
+        float speed = combatant.Stats.moveSpeed;
+
+        if (combatant.LegsDisabled)
+            speed *= 0.1f;
+
+        if (combatant.CurrentStamina <= 0.1f)
+            speed *= lowStaminaSpeedMultiplier;
+
+        return speed;
+    }
+
     public void Stop()
     {
         DesiredDirection = Vector2.zero;
@@ -49,6 +67,8 @@ public class OrganismMovementMotor : MonoBehaviour
 
     private void FixedUpdate()
     {
+        IsSelfMoving = false;
+
         if (rb == null)
             return;
 
@@ -74,17 +94,13 @@ public class OrganismMovementMotor : MonoBehaviour
 
         Vector2 moveDirection = input.normalized;
         float angleToMove = Vector2.Angle(GetCurrentFacingDirection(), moveDirection);
-
-        float moveSpeed = combatant != null ? combatant.Stats.moveSpeed : 0f;
-        if (combatant != null && combatant.CurrentStamina <= 0.1f)
-            moveSpeed *= lowStaminaSpeedMultiplier;
-
-        float speedMultiplier = GetMoveSpeedMultiplier(angleToMove);
+        float angleSpeedMultiplier = GetMoveSpeedMultiplier(angleToMove);
 
         RotateToDirection(moveDirection);
-        rb.linearVelocity = moveDirection * (moveSpeed * speedMultiplier);
+        rb.linearVelocity = moveDirection * (GetCurrentMoveSpeed() * angleSpeedMultiplier);
 
         FacingDirection = moveDirection;
+        IsSelfMoving = rb.linearVelocity.sqrMagnitude > 0.0001f;
     }
 
     private float GetMoveSpeedMultiplier(float angleToMove)

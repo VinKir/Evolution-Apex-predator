@@ -85,6 +85,7 @@ public class OrganismCombatant : MonoBehaviour
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Animator animator;
+    [SerializeField] private OrganismMovementMotor movement;
     [SerializeField] private AttackHitbox attackHitbox;
     [SerializeField] private FoodItem corpsePrefab;
     [Header("Visuals")]
@@ -106,6 +107,7 @@ public class OrganismCombatant : MonoBehaviour
     public float CurrentLeftLegHp { get; private set; }
     public float CurrentRightLegHp { get; private set; }
     public float CurrentStamina { get; private set; }
+    public bool LegsDisabled => legsDisabled;
 
     public float CurrentBodyHpNormalized => Stats.maxBodyHp <= 0.001f ? 0f : CurrentBodyHp / Stats.maxBodyHp;
     public bool IsDead { get; private set; }
@@ -139,6 +141,9 @@ public class OrganismCombatant : MonoBehaviour
     {
         if (rb == null)
             rb = GetComponent<Rigidbody2D>();
+
+        if (movement == null)
+            movement = GetComponent<OrganismMovementMotor>();
         
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
@@ -181,15 +186,10 @@ public class OrganismCombatant : MonoBehaviour
 
         Regenerate(Time.deltaTime);
 
-        if (rb != null)
+        if (movement != null && movement.IsSelfMoving)
         {
-            float currentMoveSpeed = Stats.moveSpeed * (legsDisabled ? 0.1f : 1f);
-            float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, currentMoveSpeed));
-
-            if (speed01 > 0.08f)
-                SpendStamina(Stats.staminaMoveCost * speed01 * Time.deltaTime);
-            else
-                RestoreStamina(Stats.staminaRegen * Time.deltaTime);
+            float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, movement.CurrentMoveSpeed));
+            SpendStamina(Stats.staminaMoveCost * speed01 * Time.deltaTime);
         }
         else
         {
