@@ -16,7 +16,7 @@ public enum BodyHitboxSlot
     Legs
 }
 
-public enum EnemyBehaviorType
+public enum OrganismBehaviourType
 {
     Scavenger,
     Predator,

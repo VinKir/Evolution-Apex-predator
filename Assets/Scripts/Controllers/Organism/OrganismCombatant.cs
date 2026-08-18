@@ -90,6 +90,7 @@ public class OrganismCombatant : MonoBehaviour
     [SerializeField] private FoodItem corpsePrefab;
     [Header("Visuals")]
     [SerializeField] private Transform graphicsRoot;
+    [SerializeField] private Transform statusBarAnchor;
 
     [Header("Attack")]
     [SerializeField] private float attackWindup = 0.12f;
@@ -100,6 +101,7 @@ public class OrganismCombatant : MonoBehaviour
     [SerializeField] private float corpseBiomassMultiplier = 1f;
 
     public OrganismRuntimeStats Stats { get; private set; }
+    public Transform StatusBarAnchor => statusBarAnchor;
 
     public float CurrentChitinHp { get; private set; }
     public float CurrentBodyHp { get; private set; }
@@ -168,15 +170,27 @@ public class OrganismCombatant : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        OrganismCombatantRegistry.Instance?.Register(this);
+    }
+
     private void OnEnable()
     {
         HookSources();
         RecalculateStats();
+        OrganismCombatantRegistry.Instance?.Register(this);
     }
 
     private void OnDisable()
     {
         UnhookSources();
+        OrganismCombatantRegistry.Instance?.Unregister(this);
+    }
+
+    private void OnDestroy()
+    {
+        OrganismCombatantRegistry.Instance?.Unregister(this);
     }
 
     private void Update()

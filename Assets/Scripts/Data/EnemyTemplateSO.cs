@@ -3,7 +3,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Evolution/Enemy Template", fileName = "EnemyTemplate")]
 public class EnemyTemplateSO : ScriptableObject
 {
-    public EnemyBehaviorType behaviorType = EnemyBehaviorType.Predator;
     public GameObject prefab;
 
     [Header("Level Range Around Player")]
