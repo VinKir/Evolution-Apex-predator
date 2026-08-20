@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class FoodInteractionController : MonoBehaviour
 {
     [SerializeField] private OrganismMovementMotor movement;
+    [SerializeField] private OrganismCombatant combatant;
     [SerializeField] private PlayerActionLock actionLock;
     [SerializeField] private PlayerProgression progression;
     [SerializeField] private PlayerWorldProgressUI worldProgressUI;
@@ -100,7 +101,10 @@ public class FoodInteractionController : MonoBehaviour
         float gained = currentFood.AddProgress(delta01);
 
         if (gained > 0f && progression != null)
+        {
             progression.AddBiomass(gained);
+            combatant.ApplyFoodGain(gained);
+        }
 
         if (currentFood == null)
         {

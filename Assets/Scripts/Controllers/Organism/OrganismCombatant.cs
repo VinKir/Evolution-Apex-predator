@@ -79,8 +79,8 @@ public class OrganismCombatant : MonoBehaviour
 
     [Header("Enemy Source")]
     [SerializeField] private EnemyTemplateSO enemyTemplate;
-    [SerializeField] private int enemyLevel = 1;
-    [SerializeField] private int enemyEvolutionStage = 1;
+    [SerializeField] private int enemyLevel = 0;
+    [SerializeField] private int enemyEvolutionStage = 0;
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
@@ -115,7 +115,7 @@ public class OrganismCombatant : MonoBehaviour
     public bool IsDead { get; private set; }
 
     public int FactionGroupId => factionGroupId;
-    public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + enemyLevel + enemyEvolutionStage * 10 + (playerProgression != null ? playerProgression.Level + playerProgression.EvolutionStage * 10 : 1);
+    public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + enemyLevel + enemyEvolutionStage * 10 + (playerProgression != null ? playerProgression.Level + playerProgression.EvolutionStage * 10 : 0);
 
     public event Action<OrganismCombatant> OnDamagedBy;
     public event Action OnRecalculated;
