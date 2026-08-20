@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class OrganismBrain
 {
     private readonly AINeeds needs = new();
@@ -49,6 +51,8 @@ public class OrganismBrain
         if (needs.NeedRest(context))
             return AIStateType.Rest;
 
+        Debug.Log("NeedFight "+ needs.NeedFight(context));
+
         if (needs.NeedFight(context))
             return AIStateType.Fight;
 
@@ -91,6 +95,8 @@ public class OrganismBrain
         if (context == null || memory == null)
             return false;
 
-        return memory.LastAttacker != null && !memory.LastAttacker.IsDead;
+        return memory.LastAttacker != null
+            && !memory.LastAttacker.IsDead
+            && context.CurrentThreat == memory.LastAttacker;
     }
 }

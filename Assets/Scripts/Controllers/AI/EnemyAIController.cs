@@ -66,8 +66,6 @@ public class EnemyAIController : MonoBehaviour
     private void OnDamagedBy(OrganismCombatant attacker)
     {
         memory.LastAttacker = attacker;
-        memory.LastThreat = attacker;
-        memory.TimeSinceLastDamage = 0f;
     }
 
     private void Update()
@@ -101,11 +99,6 @@ public class EnemyAIController : MonoBehaviour
     {
         context.UpdateFrom(this, memory);
 
-        if (memory.LastAttacker != null && !memory.LastAttacker.IsDead)
-            memory.LastThreat = memory.LastAttacker;
-        else
-            memory.LastThreat = context.CurrentThreat;
-
         // Try to regrow disabled body parts
         brain.TryRegrowParts(context, memory);
 
@@ -121,8 +114,6 @@ public class EnemyAIController : MonoBehaviour
             if (attacker != null && !combatant.IsFriendlyTo(attacker))
             {
                 memory.LastAttacker = attacker;
-                memory.LastThreat = attacker;
-                memory.TimeSinceLastDamage = 0f;
             }
         }
     }

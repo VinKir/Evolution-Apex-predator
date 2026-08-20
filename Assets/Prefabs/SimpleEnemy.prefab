@@ -774,7 +774,7 @@ MonoBehaviour:
   movement: {fileID: 4549512270699472470}
   behaviourType: 1
   thinkInterval: 0.4
-  attackRange: 2
+  attackRange: 2.4
   corpseEatRange: 2.4
   wanderChangeInterval: 2.5
   targetReachThreshold: 1.5

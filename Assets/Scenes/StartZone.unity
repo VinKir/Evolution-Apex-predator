@@ -5897,6 +5897,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoodInteractionController
   movement: {fileID: 1580907990}
+  combatant: {fileID: 1580907988}
   actionLock: {fileID: 1580907980}
   progression: {fileID: 1580907981}
   worldProgressUI: {fileID: 1284898182}
@@ -7021,6 +7022,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoodInteractionController
   movement: {fileID: 1580907990}
+  combatant: {fileID: 1580907988}
   actionLock: {fileID: 1580907980}
   progression: {fileID: 1580907981}
   worldProgressUI: {fileID: 1284898182}
@@ -7185,8 +7187,8 @@ MonoBehaviour:
   playerProgression: {fileID: 1580907981}
   playerBody: {fileID: 1580907978}
   enemyTemplate: {fileID: 0}
-  enemyLevel: 1
-  enemyEvolutionStage: 1
+  enemyLevel: 0
+  enemyEvolutionStage: 0
   rb: {fileID: 1580907983}
   animator: {fileID: 1922055455}
   movement: {fileID: 1580907990}

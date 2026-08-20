@@ -119,25 +119,16 @@ public class AIContext
                 VisibleFood.Add(food);
         }
 
-        CurrentThreat = SelectThreat(memory, owner);
-        CurrentTarget = SelectTarget(memory);
+        CurrentThreat = SelectThreat(owner);
+        CurrentTarget = SelectTarget();
         DistanceToEnemy = CurrentTarget == null ? 999f : Vector2.Distance(CurrentPosition, CurrentTarget.transform.position);
-
-        if (memory != null && memory.LastAttacker != null && !memory.LastAttacker.IsDead)
-        {
-            CurrentThreat = memory.LastAttacker;
-            HasThreat = true;
-        }
 
         NearestEnemy = GetNearestVisibleEnemy();
         NearestFood = GetNearestVisibleFood();
         NearestAlly = GetNearestVisibleAlly();
 
         if (NearestFood != null)
-        {
             DistanceToFood = Vector2.Distance(CurrentPosition, NearestFood.transform.position);
-            CurrentTarget = null;
-        }
         else
         {
             DistanceToFood = 999f;
@@ -153,7 +144,7 @@ public class AIContext
         IsLowStamina = StaminaRatio < 0.25f;
     }
 
-    private OrganismCombatant SelectThreat(AIMemory memory, EnemyAIController owner)
+    private OrganismCombatant SelectThreat(EnemyAIController owner)
     {
         if (owner == null || Combatant == null)
             return null;
@@ -172,7 +163,7 @@ public class AIContext
         return preferred;
     }
 
-    private OrganismCombatant SelectTarget(AIMemory memory)
+    private OrganismCombatant SelectTarget()
     {
         if (Combatant == null)
             return null;
@@ -185,7 +176,7 @@ public class AIContext
                 .FirstOrDefault();
         }
 
-        return memory != null ? memory.CurrentTarget : null;
+        return null;
     }
 
     private OrganismCombatant GetNearestVisibleEnemy()

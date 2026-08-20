@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class AINeeds
 {
     public bool NeedRest(AIContext context)
@@ -30,7 +32,7 @@ public class AINeeds
         if (context.IsLowHealth)
             return true;
 
-        return IsStrongerThan(context.CurrentThreat, context.Combatant, 0.4f) == false;
+        return IsStrongerThan(context.CurrentThreat, context.Combatant, 0.4f);
     }
 
     public bool NeedFight(AIContext context)

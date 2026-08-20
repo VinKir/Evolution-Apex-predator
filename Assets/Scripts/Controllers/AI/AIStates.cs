@@ -63,6 +63,7 @@ public class FleeState : AIState
     {
         if (Context.CurrentThreat == null || Context.CurrentThreat.IsDead)
         {
+            StopMovement();
             return;
         }
 
@@ -78,11 +79,18 @@ public class FightState : AIState
     public override void Update()
     {
         if (Context.CurrentTarget == null || Context.CurrentTarget.IsDead)
+        {
+            StopMovement();
             return;
+        }
 
         float dist = Vector2.Distance(Owner.transform.position, Context.CurrentTarget.transform.position);
         if (dist <= Owner.AttackRange)
+        {
             Owner.Combatant.TryStartMeleeAttack();
+            StopMovement();
+            return;
+        }
 
         Vector2 dir = ((Vector2)Context.CurrentTarget.transform.position - (Vector2)Owner.transform.position).normalized;
         SetMovementDirection(dir);
@@ -122,7 +130,10 @@ public class HuntState : AIState
     public override void Update()
     {
         if (Context.CurrentTarget == null || Context.CurrentTarget.IsDead)
+        {
+            StopMovement();
             return;
+        }
 
         Vector2 dir = ((Vector2)Context.CurrentTarget.transform.position - (Vector2)Owner.transform.position).normalized;
         SetMovementDirection(dir);
