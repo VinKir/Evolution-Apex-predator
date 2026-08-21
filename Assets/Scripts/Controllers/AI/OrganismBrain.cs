@@ -51,8 +51,6 @@ public class OrganismBrain
         if (needs.NeedRest(context))
             return AIStateType.Rest;
 
-        Debug.Log("NeedFight "+ needs.NeedFight(context));
-
         if (needs.NeedFight(context))
             return AIStateType.Fight;
 

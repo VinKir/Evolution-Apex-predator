@@ -45,8 +45,6 @@ public class FoodItem : MonoBehaviour
 
         if (IsFullyEaten)
             Destroy(gameObject);
-        
-        Debug.Log(consumedProgress + " " + (consumedProgress >= 1f).ToString());
 
         return gainedBiomass;
     }

@@ -18,7 +18,7 @@ public class AINeeds
         if (context == null)
             return false;
 
-        return context.IsHungry || context.HealthRatio < 0.7f;
+        return context.IsHungry || context.HealthRatio < 0.9f;
     }
 
     public bool NeedRun(AIContext context)

@@ -521,7 +521,6 @@ public class OrganismCombatant : MonoBehaviour
             Color color = chitinCracks.color;
             color.a = damagePercent;
             chitinCracks.color = color;
-            Debug.Log("AAAA" + color.a);
         }
     }
 
