@@ -91,6 +91,8 @@ public class OrganismCombatant : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private Transform graphicsRoot;
     [SerializeField] private Transform statusBarAnchor;
+    [SerializeField] private SpriteRenderer chitinCracks;
+    [SerializeField] private SpriteRenderer chitinBroken;
 
     [Header("Attack")]
     [SerializeField] private float attackWindup = 0.12f;
@@ -118,6 +120,11 @@ public class OrganismCombatant : MonoBehaviour
     public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + enemyLevel + enemyEvolutionStage * 10 + (playerProgression != null ? playerProgression.Level + playerProgression.EvolutionStage * 10 : 0);
 
     public event Action<OrganismCombatant> OnDamagedBy;
+    public event Action OnChitinHpChanged;
+    public event Action OnBodyHpChanged;
+    public event Action OnJawsHpChanged;
+    public event Action OnLegsHpChanged;
+    public event Action OnStaminaChanged;
     public event Action OnRecalculated;
     public event Action OnDied;
 
@@ -173,18 +180,26 @@ public class OrganismCombatant : MonoBehaviour
     private void Start()
     {
         OrganismCombatantRegistry.Instance?.Register(this);
+        
+        OnChitinHpChanged?.Invoke();
+        OnBodyHpChanged?.Invoke();
+        OnJawsHpChanged?.Invoke();
+        OnLegsHpChanged?.Invoke();
+        OnStaminaChanged?.Invoke();
     }
 
     private void OnEnable()
     {
         HookSources();
         RecalculateStats();
+        OnChitinHpChanged += UpdateChitinVisuals;
         OrganismCombatantRegistry.Instance?.Register(this);
     }
 
     private void OnDisable()
     {
         UnhookSources();
+        OnChitinHpChanged -= UpdateChitinVisuals;
         OrganismCombatantRegistry.Instance?.Unregister(this);
     }
 
@@ -473,36 +488,99 @@ public class OrganismCombatant : MonoBehaviour
         return UnityEngine.Random.Range(min, max);
     }
 
+    private void UpdateChitinVisuals()
+    {
+        if (chitinCracks == null && chitinBroken == null)
+            return;
+
+        float damagePercent = 0f;
+
+        if (Stats.maxChitinHp > 0f)
+            damagePercent = Mathf.Clamp01(1f - (CurrentChitinHp / Stats.maxChitinHp));
+
+        // Completely broken chitin
+        if (CurrentChitinHp <= 0f)
+        {
+            if (chitinCracks != null)
+                chitinCracks.gameObject.SetActive(false);
+
+            if (chitinBroken != null)
+                chitinBroken.gameObject.SetActive(true);
+
+            return;
+        }
+
+        // Chitin exists again -> disable broken state
+        if (chitinBroken != null)
+            chitinBroken.gameObject.SetActive(false);
+
+        if (chitinCracks != null)
+        {
+            chitinCracks.gameObject.SetActive(true);
+
+            Color color = chitinCracks.color;
+            color.a = damagePercent;
+            chitinCracks.color = color;
+            Debug.Log("AAAA" + color.a);
+        }
+    }
+
     public void SpendStamina(float amount)
     {
         if (amount <= 0f)
             return;
 
-        CurrentStamina = Mathf.Max(0f, CurrentStamina - amount);
+        CurrentStamina = Mathf.Max(0f,  CurrentStamina - amount);
+        OnStaminaChanged?.Invoke();
     }
 
     public void RestoreStamina(float amount)
     {
         if (amount <= 0f)
             return;
-
+ 
         CurrentStamina = Mathf.Min(Stats.maxStamina, CurrentStamina + amount);
+        OnStaminaChanged?.Invoke();
     }
 
     private void Regenerate(float dt)
     {
-        if (!chitinDisabled)
-            CurrentChitinHp = Mathf.Min(Stats.maxChitinHp, CurrentChitinHp + Stats.chitinRegenPerSec * dt * Stats.maxChitinHp);
-
-        CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + Stats.bodyRegenPerSec * dt * Stats.maxBodyHp);
-
-        if (!jawsDisabled)
-            CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + Stats.jawsRegenPerSec * dt * Stats.maxJawHp);
-
-        if (!legsDisabled)
+        if (Stats.chitinRegenPerSec > 0f && !chitinDisabled && CurrentChitinHp < Stats.maxChitinHp)
         {
-            CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
-            CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
+            CurrentChitinHp = Mathf.Min(Stats.maxChitinHp, CurrentChitinHp + Stats.chitinRegenPerSec * dt * Stats.maxChitinHp);
+            OnChitinHpChanged?.Invoke();
+        }
+
+        if (Stats.bodyRegenPerSec > 0f && CurrentBodyHp < Stats.maxBodyHp)
+        {
+            CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + Stats.bodyRegenPerSec * dt * Stats.maxBodyHp);
+            OnBodyHpChanged?.Invoke();
+        }
+
+        if (Stats.jawsRegenPerSec > 0f && !jawsDisabled && CurrentJawsHp < Stats.maxJawHp)
+        {
+            CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + Stats.jawsRegenPerSec * dt * Stats.maxJawHp);
+            OnJawsHpChanged?.Invoke();
+        }
+
+        if (Stats.legsRegenPerSec > 0f && !legsDisabled)
+        {
+            bool changed = false;
+
+            if (CurrentLeftLegHp < Stats.maxLegHp)
+            {
+                CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
+                changed = true;
+            }
+
+            if (CurrentRightLegHp < Stats.maxLegHp)
+            {
+                CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
+                changed = true;
+            }
+
+            if (changed)
+                OnLegsHpChanged?.Invoke();
         }
     }
 
@@ -666,6 +744,8 @@ public class OrganismCombatant : MonoBehaviour
         CurrentChitinHp = Mathf.Max(0f, CurrentChitinHp - amount);
         if (CurrentChitinHp <= 0f)
             CurrentChitinHp = 0f;
+        
+        OnChitinHpChanged?.Invoke();
     }
 
     private void ApplyBodyDamage(float amount, bool hadChitin)
@@ -676,6 +756,8 @@ public class OrganismCombatant : MonoBehaviour
         float mult = 1f + Stats.bodyDamageTakenMult;
         float reduced = amount * mult;
         CurrentBodyHp = Mathf.Max(0f, CurrentBodyHp - reduced);
+
+        OnBodyHpChanged?.Invoke();
     }
 
     private void ApplyJawsDamage(float amount, bool hadChitin)
@@ -683,13 +765,15 @@ public class OrganismCombatant : MonoBehaviour
         if (amount <= 0f)
             return;
 
-        float mult = 1f + Stats.bodyDamageTakenMult;
+        float mult = 1f + Stats.limbDamageTakenMult;
         CurrentJawsHp = Mathf.Max(0f, CurrentJawsHp - amount * mult);
         if (CurrentJawsHp <= 0f)
         {
             CurrentJawsHp = 0f;
             DisablePart(BodyPartType.Jaws);
         }
+
+        OnJawsHpChanged?.Invoke();
     }
 
     private void ApplyLegDamage(bool left, float amount, bool hadChitin)
@@ -712,6 +796,8 @@ public class OrganismCombatant : MonoBehaviour
             CurrentRightLegHp = Mathf.Max(0f, CurrentRightLegHp);
             DisablePart(BodyPartType.Legs);
         }
+        
+        OnLegsHpChanged?.Invoke();
     }
 
     public void TakeReflectedDamage(float amount)
@@ -720,6 +806,8 @@ public class OrganismCombatant : MonoBehaviour
             return;
 
         CurrentBodyHp = Mathf.Max(0f, CurrentBodyHp - amount);
+
+        OnBodyHpChanged?.Invoke();
         CheckDeath();
     }
 
@@ -729,6 +817,8 @@ public class OrganismCombatant : MonoBehaviour
             return;
 
         CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + amount);
+        
+        OnBodyHpChanged?.Invoke();
     }
 
     public void ApplyFoodGain(float biomass)
@@ -752,6 +842,12 @@ public class OrganismCombatant : MonoBehaviour
 
         if (CurrentChitinHp > 0f && chitinDisabled)
             EnablePart(BodyPartType.Chitin);
+        
+        OnChitinHpChanged?.Invoke();
+        OnBodyHpChanged?.Invoke();
+        OnJawsHpChanged?.Invoke();
+        OnLegsHpChanged?.Invoke();
+        OnStaminaChanged?.Invoke();
     }
 
     private void DisablePart(BodyPartType part)
@@ -840,14 +936,21 @@ public class OrganismCombatant : MonoBehaviour
 
         // restore to at least percent of max HP
         if (part == BodyPartType.Jaws)
+        {
             CurrentJawsHp = Mathf.Max(CurrentJawsHp, maxHp * percent);
+            OnJawsHpChanged?.Invoke();
+        }
         else if (part == BodyPartType.Legs)
         {
             CurrentLeftLegHp = Mathf.Max(CurrentLeftLegHp, maxHp * percent);
             CurrentRightLegHp = Mathf.Max(CurrentRightLegHp, maxHp * percent);
+            OnLegsHpChanged?.Invoke();
         }
         else if (part == BodyPartType.Chitin)
+        {
             CurrentChitinHp = Mathf.Max(CurrentChitinHp, maxHp * percent);
+            OnChitinHpChanged?.Invoke();
+        }
 
         EnablePart(part);
 
@@ -945,15 +1048,6 @@ public class OrganismCombatant : MonoBehaviour
     {
         float sum = Mathf.Pow(10, enemyEvolutionStage - 1) + enemyLevel;
         return Mathf.Max(1f, sum * corpseBiomassMultiplier);
-    }
-
-    public bool CanSee(Transform target, float extraRange = 0f)
-    {
-        if (target == null)
-            return false;
-
-        float dist = Vector2.Distance(transform.position, target.position);
-        return dist <= Stats.detectionRadius + extraRange;
     }
 
     public bool IsFriendlyTo(OrganismCombatant other)

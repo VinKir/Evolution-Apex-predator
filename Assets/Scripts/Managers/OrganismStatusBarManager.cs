@@ -98,9 +98,6 @@ public class OrganismStatusBarManager : MonoBehaviour
         }
 
         UpdateBarPosition(combatant, bar);
-
-        bar.Refresh();
-        // TODO: Можно изменить обновление слайдеров не через Update, а через событие завязанное в ОрганизмКомбатант на изменение здоровья и остального
     }
 
     private void HideBar(OrganismCombatant combatant)

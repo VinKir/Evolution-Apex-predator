@@ -13,53 +13,86 @@ public class OrganismStatusBar : MonoBehaviour
     public void Bind(OrganismCombatant combatant)
     {
         Combatant = combatant;
+        Combatant.OnChitinHpChanged += RefreshChitinHp;
+        Combatant.OnBodyHpChanged += RefreshBodyHp;
+        Combatant.OnStaminaChanged += RefreshStamina;
+        Combatant.OnRecalculated += RefreshStats;
+
+        RefreshStats();
 
         gameObject.SetActive(true);
-
-        Refresh();
     }
 
     public void Unbind()
     {
-        Combatant = null;
+        if (Combatant != null)
+        {
+            Combatant.OnChitinHpChanged -= RefreshChitinHp;
+            Combatant.OnBodyHpChanged -= RefreshBodyHp;
+            Combatant.OnStaminaChanged -= RefreshStamina;
+            Combatant.OnRecalculated -= RefreshStats;
+
+            Combatant = null;
+        }
+
     }
 
-    public void Refresh()
+    private void RefreshStats()
     {
         if (Combatant == null)
             return;
 
-        SetSlider(
-            chitinHpSlider,
-            Combatant.CurrentChitinHp,
-            Combatant.Stats.maxChitinHp
-        );
+        SetSliderMax(chitinHpSlider, Combatant.Stats.maxChitinHp);
+        SetSliderMax(bodyHpSlider, Combatant.Stats.maxBodyHp);
+        SetSliderMax(staminaSlider, Combatant.Stats.maxStamina);
 
-        SetSlider(
-            bodyHpSlider,
-            Combatant.CurrentBodyHp,
-            Combatant.Stats.maxBodyHp
-        );
-
-        SetSlider(
-            staminaSlider,
-            Combatant.CurrentStamina,
-            Combatant.Stats.maxStamina
-        );
+        RefreshChitinHp();
+        RefreshBodyHp();
+        RefreshStamina();
     }
 
-    private static void SetSlider(
-        Slider slider,
-        float current,
-        float max)
+    private void RefreshChitinHp()
+    {
+        if (Combatant == null)
+            return;
+
+        SetSliderValue(chitinHpSlider, Combatant.CurrentChitinHp);
+    }
+
+    private void RefreshBodyHp()
+    {
+        if (Combatant == null)
+            return;
+
+        SetSliderValue(bodyHpSlider, Combatant.CurrentBodyHp);
+    }
+
+    private void RefreshStamina()
+    {
+        if (Combatant == null)
+            return;
+
+        SetSliderValue(staminaSlider, Combatant.CurrentStamina);
+    }
+
+    private static void SetSliderMax(Slider slider, float max)
     {
         if (slider == null)
             return;
 
-        max = Mathf.Max(0.01f, max);
-
         slider.minValue = 0f;
-        slider.maxValue = max;
-        slider.value = Mathf.Clamp(current, 0f, max);
+        slider.maxValue = Mathf.Max(0.01f, max);
+    }
+
+    private static void SetSliderValue(Slider slider, float value)
+    {
+        if (slider == null)
+            return;
+
+        slider.value = Mathf.Clamp(
+            value,
+            slider.minValue,
+            slider.maxValue
+        );
     }
 }
