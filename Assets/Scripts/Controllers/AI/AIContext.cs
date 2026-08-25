@@ -139,8 +139,8 @@ public class AIContext
         CanAttack = HasTarget && DistanceToEnemy <= AttackRange && CurrentStamina > 0.01f;
         CanEat = NearestFood != null && DistanceToFood <= EatRange;
         CanMove = !Combatant.IsDead;
-        IsHungry = HealthRatio < 0.7f;
-        IsLowHealth = HealthRatio < 0.35f;
+        IsHungry = HealthRatio < 0.9f;
+        IsLowHealth = HealthRatio < 0.30f;
         IsLowStamina = StaminaRatio < 0.25f;
     }
 

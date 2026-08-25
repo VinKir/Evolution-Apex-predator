@@ -29,7 +29,7 @@ public class AINeeds
         if (!context.HasThreat || context.CurrentThreat == null)
             return false;
 
-        if (context.IsLowHealth)
+        if (context.IsLowHealth && context.CurrentThreat.CurrentBodyHpNormalized > 0.30f)
             return true;
 
         return IsStrongerThan(context.CurrentThreat, context.Combatant, 0.4f);
