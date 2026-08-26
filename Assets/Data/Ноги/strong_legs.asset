@@ -32,4 +32,8 @@ MonoBehaviour:
     \u043F\u0440\u043E\u0447\u043D\u0435\u0435, \u043D\u043E \u0438 \u043D\u0430\u0434\u0451\u0436\u043D\u0435\u0435
     \u0432 \u0431\u043E\u044E."
   overlaySprite: {fileID: 21300000, guid: 6500c2aa4e8d13e41af3663d139034c0, type: 3}
-  modifiers: []
+  modifiers:
+  - stat: 24
+    value: 0.2
+    perLevel: 0.01
+    perEvolutionStage: 0.1

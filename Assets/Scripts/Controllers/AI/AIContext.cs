@@ -98,6 +98,7 @@ public class AIContext
             IsHome = true;
         }
 
+        // TODO: переделать детекцию. Замечать должен не ты, а тебя. Радиус детекции показывает на каком расстоянии боты заметят данное существо. Потому что в данный радиус детекции показывает на каком радиусе данное существо замечает других существ
         var colliders = Physics2D.OverlapCircleAll(CurrentPosition, Combatant.Stats.detectionRadius);
 
         foreach (var collider in colliders)

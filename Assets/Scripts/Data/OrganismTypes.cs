@@ -1,5 +1,13 @@
 using System;
 
+public static class CombatSettings
+{
+    public const float BaseChitinDamageMultiplier = 0.5f; // percent 0.5 - 50%
+    public const float BaseInternalDamageMultiplier = 0.3f; // percent 0.3 - 30%
+    public const float BleedingTickInterval = 1f; // in seconds
+    public const float BaseRegrowCooldown = 180f; // in seconds
+}
+
 public enum BodyPartType
 {
     Chitin,
@@ -26,22 +34,31 @@ public enum OrganismBehaviourType
 public enum BodyStatType
 {
     AttackDamageMult,
-    ChitinDamageTakenMult,
-    BodyDamageTakenMult,
-    LimbDamageTakenMult,
-    BodyBypassBonus,
+    ChitinDamageMultiplierDealt,
+    ChitinDamageMultiplierTaken,
+    InternalDamageMultiplierDealt,
+    InternalDamageMultiplierTaken,
+    BodyDamageMultiplierDealt,
+    BodyDamageMultiplierTaken,
+    LimbDamageMultiplierDealt,
+    LimbDamageMultiplierTaken,
+    LegsDamageMultiplierDealt,
+    LegsDamageMultiplierTaken,
+    JawsDamageMultiplierDealt,
+    JawsDamageMultiplierTaken,
     BleedPercent,
+    BleedDurationSeconds,
     LifestealPercent,
-    ReflectPercent,
+    ChitinReflectPercent,
     MoveSpeedMult,
     TurnSpeedMult,
-    StaminaMoveCostMult,
-    StaminaAttackCostMult,
+    StaminaMoveCostReduction,
+    StaminaAttackCostReduction,
     MaxChitinHpMult,
     MaxBodyHpMult,
     MaxJawHpMult,
     MaxLegHpMult,
-    DetectRadiusMult,
+    DetectRadiusReduction,
     SizeMult,
     ChitinRegenPerSec,
     JawsRegenPerSec,
@@ -49,9 +66,9 @@ public enum BodyStatType
     BodyRegenPerSec,
     AttackVsHealthyMult,
     AttackVsLowMult,
-    JawsRegrow,
-    LegsRegrow,
-    ChitinRegrow,
+    JawsRegrowPercent,
+    LegsRegrowPercent,
+    ChitinRegrowPercent,
     JawsRegrowCooldownReduction,
     LegsRegrowCooldownReduction,
     ChitinRegrowCooldownReduction
@@ -70,22 +87,31 @@ public struct BodyStatModifier
 public struct CombatBonusAccumulator
 {
     public float attackDamageMult;
-    public float chitinDamageTakenMult;
-    public float bodyDamageTakenMult;
-    public float limbDamageTakenMult;
-    public float bodyBypassBonus;
+    public float chitinDamageMultiplierDealt;
+    public float chitinDamageMultiplierTaken;
+    public float internalDamageMultiplierDealt;
+    public float internalDamageMultiplierTaken;
+    public float bodyDamageMultiplierDealt;
+    public float bodyDamageMultiplierTaken;
+    public float limbDamageMultiplierDealt;
+    public float limbDamageMultiplierTaken;
+    public float legsDamageMultiplierDealt;
+    public float legsDamageMultiplierTaken;
+    public float jawsDamageMultiplierDealt;
+    public float jawsDamageMultiplierTaken;
     public float bleedPercent;
+    public float bleedDurationSeconds;
     public float lifestealPercent;
-    public float reflectPercent;
+    public float chitinReflectPercent;
     public float moveSpeedMult;
     public float turnSpeedMult;
-    public float staminaMoveCostMult;
-    public float staminaAttackCostMult;
+    public float staminaMoveCostReduction;
+    public float staminaAttackCostReduction;
     public float maxChitinHpMult;
     public float maxBodyHpMult;
     public float maxJawHpMult;
     public float maxLegHpMult;
-    public float detectRadiusMult;
+    public float detectRadiusReduction;
     public float sizeMult;
     public float chitinRegenPerSec;
     public float jawsRegenPerSec;

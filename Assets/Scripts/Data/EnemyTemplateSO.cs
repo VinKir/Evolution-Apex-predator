@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Evolution/Enemy Template", fileName = "EnemyTemplate")]
@@ -28,6 +29,9 @@ public class EnemyTemplateSO : ScriptableObject
     public float baseTurnSpeedMax = 8f;
     public float baseDetectionRadiusMin = 4f;
     public float baseDetectionRadiusMax = 7f;
+
+    [Header("Mutations")]
+    public List<PlayerBody.BodyPartRuntimeState> bodyParts = new();
 
     [Header("Death Drop")]
     public float corpseBiomassMultiplier = 1f;
