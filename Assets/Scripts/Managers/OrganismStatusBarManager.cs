@@ -91,7 +91,6 @@ public class OrganismStatusBarManager : MonoBehaviour
             if (bar == null)
                 return;
 
-            bar.transform.SetParent(canvas.transform, false);
             bar.Bind(combatant);
 
             activeBars.Add(combatant, bar);
