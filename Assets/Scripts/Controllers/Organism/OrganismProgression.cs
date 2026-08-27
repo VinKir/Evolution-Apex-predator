@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-public class PlayerProgression : MonoBehaviour
+public class OrganismProgression : MonoBehaviour
 {
     [Header("Level")]
     [SerializeField] private int level = 1;
     [SerializeField] private int experience = 0;
-    [SerializeField] private int experienceToNextLevel = 100;
+    [SerializeField] private int experienceToNextLevel = 10;
 
     [Header("Mutation")]
     [SerializeField] private int evolutionStage = 1;
@@ -28,6 +28,15 @@ public class PlayerProgression : MonoBehaviour
 
     public bool CanEvolve => level >= LevelCap;
 
+    public void InitializeRuntime(int initialLevel, int initialEvolutionStage)
+    {
+        evolutionStage = Mathf.Max(1, initialEvolutionStage);
+        level = Mathf.Clamp(initialLevel, 1, LevelCap);
+        experience = 0;
+        experienceToNextLevel = 10 * level;
+        mutationCap = evolutionStage * 5;
+    }
+
     public void AddExperience(int amount)
     {
         if (amount <= 0)
@@ -43,7 +52,7 @@ public class PlayerProgression : MonoBehaviour
             experience -= experienceToNextLevel;
             level++;
 
-            experienceToNextLevel = Mathf.CeilToInt(experienceToNextLevel * 1.25f);
+            experienceToNextLevel = Mathf.CeilToInt(experienceToNextLevel + 10f);
 
             if (level >= LevelCap)
             {

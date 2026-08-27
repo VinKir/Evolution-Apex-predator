@@ -2,14 +2,14 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(PlayerProgression))]
+[CustomEditor(typeof(OrganismProgression))]
 public class PlayerProgressionEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        var p = (PlayerProgression)target;
+        var p = (OrganismProgression)target;
 
         GUILayout.Space(12);
         EditorGUILayout.LabelField("Debug Buttons", EditorStyles.boldLabel);

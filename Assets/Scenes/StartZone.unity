@@ -7189,7 +7189,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProgression
   level: 1
   experience: 0
-  experienceToNextLevel: 100
+  experienceToNextLevel: 10
   evolutionStage: 1
   mutationCap: 5
   biomass: 0
@@ -7276,11 +7276,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrganismCombatant
   isPlayer: 1
   factionGroupId: 0
-  playerProgression: {fileID: 1580907981}
+  progression: {fileID: 1580907981}
   playerBody: {fileID: 1580907978}
   enemyTemplate: {fileID: 0}
-  enemyLevel: 0
-  enemyEvolutionStage: 0
   rb: {fileID: 1580907983}
   animator: {fileID: 1922055455}
   movement: {fileID: 1580907990}

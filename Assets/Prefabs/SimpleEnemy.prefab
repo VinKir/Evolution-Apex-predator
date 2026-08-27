@@ -768,6 +768,7 @@ GameObject:
   - component: {fileID: 5682619519553953665}
   - component: {fileID: 3261175036440709481}
   - component: {fileID: 7376604699610478457}
+  - component: {fileID: 7817688973090416830}
   - component: {fileID: 943026238583717204}
   - component: {fileID: 4549512270699472470}
   m_Layer: 0
@@ -836,11 +837,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrganismCombatant
   isPlayer: 0
   factionGroupId: 1
-  playerProgression: {fileID: 0}
+  progression: {fileID: 7817688973090416830}
   playerBody: {fileID: 0}
   enemyTemplate: {fileID: 11400000, guid: 62fd75420fde6451283edbbfa8124416, type: 2}
-  enemyLevel: 1
-  enemyEvolutionStage: 1
   rb: {fileID: 3261175036440709481}
   animator: {fileID: 1165410746487256715}
   movement: {fileID: 4549512270699472470}
@@ -853,7 +852,25 @@ MonoBehaviour:
   attackWindup: 0.12
   attackActiveTime: 0.18
   attackCooldown: 0.55
-  corpseBiomassMultiplier: 10
+  corpseBiomassMultiplier: 1
+--- !u!114 &7817688973090416830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5098495969252214907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e140b12a75b17894fac7a33d551c6a14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrganismProgression
+  level: 1
+  experience: 0
+  experienceToNextLevel: 10
+  evolutionStage: 1
+  mutationCap: 5
+  biomass: 0
 --- !u!114 &943026238583717204
 MonoBehaviour:
   m_ObjectHideFlags: 0

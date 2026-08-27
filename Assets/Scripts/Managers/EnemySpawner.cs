@@ -151,13 +151,13 @@ public class EnemySpawner : MonoBehaviour
 
     private int PlayerLevel()
     {
-        var p = player != null ? player.GetComponent<PlayerProgression>() : null;
+        var p = player != null ? player.GetComponent<OrganismProgression>() : null;
         return p != null ? p.Level : 1;
     }
 
     private int PlayerEvo()
     {
-        var p = player != null ? player.GetComponent<PlayerProgression>() : null;
+        var p = player != null ? player.GetComponent<OrganismProgression>() : null;
         return p != null ? p.EvolutionStage : 1;
     }
 }

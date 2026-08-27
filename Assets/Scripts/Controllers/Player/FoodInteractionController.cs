@@ -6,7 +6,7 @@ public class FoodInteractionController : MonoBehaviour
     [SerializeField] private OrganismMovementMotor movement;
     [SerializeField] private OrganismCombatant combatant;
     [SerializeField] private PlayerActionLock actionLock;
-    [SerializeField] private PlayerProgression progression;
+    [SerializeField] private OrganismProgression progression;
     [SerializeField] private PlayerWorldProgressUI worldProgressUI;
     [SerializeField] private Button eatButton;
     [SerializeField] private MutationUIController mutationUI;

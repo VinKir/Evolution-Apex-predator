@@ -84,14 +84,12 @@ public class OrganismCombatant : MonoBehaviour
     [SerializeField] private bool isPlayer = true;
     [SerializeField] private int factionGroupId = 0;
 
-    [Header("Player Sources")]
-    [SerializeField] private PlayerProgression playerProgression;
+    [Header("Progression")]
+    [SerializeField] private OrganismProgression progression;
     [SerializeField] private PlayerBody playerBody;
 
     [Header("Enemy Source")]
     [SerializeField] private EnemyTemplateSO enemyTemplate;
-    [SerializeField] private int enemyLevel = 0;
-    [SerializeField] private int enemyEvolutionStage = 0;
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
@@ -128,7 +126,9 @@ public class OrganismCombatant : MonoBehaviour
     public bool IsDead { get; private set; }
 
     public int FactionGroupId => factionGroupId;
-    public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + enemyLevel + enemyEvolutionStage * 10 + (playerProgression != null ? playerProgression.Level + playerProgression.EvolutionStage * 10 : 0);
+    public int Level => progression != null ? progression.Level : 1;
+    public int EvolutionStage => progression != null ? progression.EvolutionStage : 1;
+    public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + Level + EvolutionStage * 10;
 
     public event Action<OrganismCombatant> OnDamagedBy;
     public event Action OnChitinHpChanged;
@@ -166,6 +166,9 @@ public class OrganismCombatant : MonoBehaviour
 
         if (movement == null)
             movement = GetComponent<OrganismMovementMotor>();
+
+        if (progression == null)
+            progression = GetComponent<OrganismProgression>();
         
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
@@ -241,35 +244,33 @@ public class OrganismCombatant : MonoBehaviour
 
     private void HookSources()
     {
-        if (isPlayer)
-        {
-            if (playerProgression != null)
-                playerProgression.OnEvolve += RecalculateStats;
+        if (progression != null)
+            progression.OnEvolve += RecalculateStats;
 
-            if (playerBody != null)
-                playerBody.OnBodyChanged += RecalculateStats;
-        }
+        if (isPlayer && playerBody != null)
+            playerBody.OnBodyChanged += RecalculateStats;
     }
 
     private void UnhookSources()
     {
-        if (isPlayer)
-        {
-            if (playerProgression != null)
-                playerProgression.OnEvolve -= RecalculateStats;
+        if (progression != null)
+            progression.OnEvolve -= RecalculateStats;
 
-            if (playerBody != null)
-                playerBody.OnBodyChanged -= RecalculateStats;
-        }
+        if (isPlayer && playerBody != null)
+            playerBody.OnBodyChanged -= RecalculateStats;
     }
 
     public void ConfigureEnemy(EnemyTemplateSO template, int level, int evoStage, int groupId)
     {
         isPlayer = false;
         enemyTemplate = template;
-        enemyLevel = level;
-        enemyEvolutionStage = evoStage;
         factionGroupId = groupId;
+
+        if (progression == null)
+            progression = GetComponent<OrganismProgression>() ?? gameObject.AddComponent<OrganismProgression>();
+        progression.OnEvolve -= RecalculateStats;
+        progression.OnEvolve += RecalculateStats;
+        progression.InitializeRuntime(level, evoStage);
 
         RecalculateStats();
     }
@@ -309,13 +310,13 @@ public class OrganismCombatant : MonoBehaviour
 
     private OrganismRuntimeStats BuildStats()
     {
-        int level = isPlayer && playerProgression != null ? playerProgression.Level : enemyLevel;
-        int evo = isPlayer && playerProgression != null ? playerProgression.EvolutionStage : enemyEvolutionStage;
+        int level = Level;
+        int evo = EvolutionStage;
         level = Mathf.Max(1, level);
         evo = Mathf.Max(1, evo);
 
-        float levelFactor = 1f + 0.03f * Mathf.Max(0, level - 1);
-        float evoFactor = 1f + 0.12f * Mathf.Max(0, evo - 1);
+        float levelFactor = 1f + 0.01f * Mathf.Max(0, level - 1);
+        float evoFactor = 1f + 0.10f * Mathf.Max(0, evo - 1);
 
         CombatBonusAccumulator bonus = AggregateBonuses();
 
@@ -327,31 +328,26 @@ public class OrganismCombatant : MonoBehaviour
         s.enduranceExt = 1.0f * levelFactor * evoFactor;
         s.enduranceInt = 1.0f * levelFactor * evoFactor;
 
-        s.maxChitinHp = 20f * s.enduranceExt * (1f + bonus.maxChitinHpMult);
-        s.maxBodyHp = 10f * s.enduranceInt * (1f + bonus.maxBodyHpMult);
-        s.maxJawHp = 8f * s.enduranceInt * (1f + bonus.maxJawHpMult);
-        s.maxLegHp = 5f * s.enduranceInt * (1f + bonus.maxLegHpMult);
+        s.maxChitinHp = 2.5f * s.enduranceExt * (1f + bonus.maxChitinHpMult);
+        s.maxBodyHp = 1f * s.enduranceInt * (1f + bonus.maxBodyHpMult);
+        s.maxJawHp = 0.8f * s.enduranceInt * (1f + bonus.maxJawHpMult);
+        s.maxLegHp = 0.8f * s.enduranceInt * (1f + bonus.maxLegHpMult);
 
-        s.maxStamina = 20f + s.strengthInt * 8f + s.enduranceInt * 12f;
-        s.staminaRegen = 5f + s.strengthInt * 0.5f + s.enduranceInt * 1.0f;
+        s.maxStamina = 5f + s.strengthInt + s.enduranceInt;
+        s.staminaRegen = 0.2f + s.strengthInt + s.enduranceInt;
 
         s.attackDamage = s.strengthExt * (1f + bonus.attackDamageMult);
 
         // TODO: сделать зависимость цены на движение и атаку от какого-то параметра, чтоб из-за высокой силы какой-то стоимость атаки и движения увеличивалась, а от чего-то другого уменьшалась
-        s.staminaMoveCost = Mathf.Max(0.01f, 5f * (1f - bonus.staminaMoveCostReduction));
-        s.staminaAttackCost = Mathf.Max(0.01f, 10f * (1f - bonus.staminaAttackCostReduction));
+        s.staminaMoveCost = Mathf.Max(0.01f, 1f * (1f - bonus.staminaMoveCostReduction));
+        s.staminaAttackCost = Mathf.Max(0.01f, 2f * (1f - bonus.staminaAttackCostReduction));
 
-        s.moveSpeed = 3.5f
-                      * (1f + bonus.moveSpeedMult)
-                      * Mathf.Clamp(1f - s.strengthExt * 0.05f + s.strengthInt * 0.015f, 0.35f, 3f);
+        s.moveSpeed = (2f - s.strengthExt * 0.05f + s.strengthInt * 0.015f)
+                      * (1f + bonus.moveSpeedMult);
 
         s.turnSpeed = 6f * (1f + bonus.turnSpeedMult) * Mathf.Clamp(1f - s.strengthExt * 0.03f, 0.4f, 2f);
 
-        s.sizeMultiplier = Mathf.Clamp(
-            1f + s.strengthExt * 0.08f - s.strengthInt * 0.03f + bonus.sizeMult,
-            0.55f,
-            3f
-        );
+        s.sizeMultiplier = (s.strengthExt * 0.08f - s.strengthInt * 0.03f) * (1f +  bonus.sizeMult);
 
         s.detectionRadius = 4.5f * s.sizeMultiplier * (1f - bonus.detectRadiusReduction);
 
@@ -393,7 +389,7 @@ public class OrganismCombatant : MonoBehaviour
     private CombatBonusAccumulator AggregateBonuses()
     {
         CombatBonusAccumulator bonuses = default;
-        int evolutionStage = isPlayer && playerProgression != null ? playerProgression.EvolutionStage : enemyEvolutionStage;
+        int evolutionStage = EvolutionStage;
 
         if (isPlayer && playerBody != null)
         {
@@ -721,6 +717,9 @@ public class OrganismCombatant : MonoBehaviour
         if (slot != BodyHitboxSlot.Chitin && packet.bleedPercent > 0f && packet.bleedDurationSeconds > 0f)
             StartCoroutine(BleedRoutine(slot, directDamage * packet.bleedPercent, packet.bleedDurationSeconds));
 
+        if (!plainDamage)
+            AwardAttackExperience(attacker, CurrentBodyHp <= 0f);
+
         if (attacker != null && packet.lifestealPercent > 0f)
             attacker.HealMostDamagedPart(directDamage * packet.lifestealPercent);
 
@@ -736,6 +735,20 @@ public class OrganismCombatant : MonoBehaviour
         }
 
         CheckDeath();
+    }
+
+    private void AwardAttackExperience(OrganismCombatant attacker, bool killed)
+    {
+        if (attacker == null || attacker.progression == null || progression == null)
+            return;
+
+        int experience = killed
+            ? Mathf.Max(0, 10 * (1 + EvolutionStage - attacker.EvolutionStage))
+                + Mathf.Max(0, Level - attacker.Level)
+                + 1
+            : 1;
+
+        attacker.progression.AddExperience(experience);
     }
 
     private void ApplyChitinDamage(float amount, OrganismCombatant attacker)
@@ -1105,7 +1118,7 @@ public class OrganismCombatant : MonoBehaviour
 
     private float EstimateCorpseBiomass()
     {
-        float sum = Mathf.Pow(10, enemyEvolutionStage - 1) + enemyLevel;
+        float sum = Mathf.Max(1, 10 * (EvolutionStage - 1)) + Level;
         return Mathf.Max(1f, sum * corpseBiomassMultiplier);
     }
 
