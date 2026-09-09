@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
   variantId: 002004
   displayName: "\u0414\u0440\u043E\u0431\u044F\u0449\u0438\u0435 \u043C\u0430\u043D\u0434\u0438\u0431\u0443\u043B\u044B"
+  bodyPart: {fileID: 11400000, guid: c707ddb3ff0771849bb947a94b8611d7, type: 2}
   unlockLevel: 5
   description: "\u0427\u0435\u043B\u044E\u0441\u0442\u0438 \u0443\u0441\u0438\u043B\u0438\u0432\u0430\u044E\u0442\u0441\u044F
     \u0432 \u0441\u0442\u043E\u0440\u043E\u043D\u0443 \u0443\u0434\u0430\u0440\u043D\u043E\u0439
@@ -32,6 +33,7 @@ MonoBehaviour:
     \u0440\u0430\u0441\u043A\u0430\u043B\u044B\u0432\u0430\u0435\u0442 \u0437\u0430\u0449\u0438\u0442\u043D\u044B\u0435
     \u043F\u043B\u0430\u0441\u0442\u0438\u043D\u044B \u0438 \u0443\u0441\u043A\u043E\u0440\u044F\u0435\u0442
     \u0438\u0445 \u0440\u0430\u0437\u0440\u0443\u0448\u0435\u043D\u0438\u0435."
+  priceInEvolutionPoints: 0
   overlaySprite: {fileID: 21300000, guid: 53f44a36fdf46774382d680ec5eacfef, type: 3}
   modifiers:
   - stat: 1

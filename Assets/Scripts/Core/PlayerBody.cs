@@ -15,7 +15,7 @@ public class PlayerBody : MonoBehaviour
     [Serializable]
     public class BodyPartRuntimeState
     {
-        public BodyPartDefinitionSO definition;
+        public BodyPartDefinitionSO organ;
         public int level;
         public List<AppliedVariant> appliedVariants = new();
     }
@@ -51,7 +51,7 @@ public class PlayerBody : MonoBehaviour
             {
                 states.Add(new BodyPartRuntimeState
                 {
-                    definition = def,
+                    organ = def,
                     level = 0
                 });
             }
@@ -62,12 +62,12 @@ public class PlayerBody : MonoBehaviour
             states.Add(new BodyPartRuntimeState());
 
         for (int i = 0; i < partDefinitions.Count; i++)
-            states[i].definition = partDefinitions[i];
+            states[i].organ = partDefinitions[i];
     }
 
     public BodyPartRuntimeState GetState(string partId)
     {
-        return states.FirstOrDefault(s => s.definition != null && s.definition.partId == partId);
+        return states.FirstOrDefault(s => s.organ != null && s.organ.partId == partId);
     }
 
     public int GetLevel(string partId)
@@ -76,7 +76,43 @@ public class PlayerBody : MonoBehaviour
         return state != null ? state.level : 0;
     }
 
-    public void ApplyMutation(Dictionary<string, int> queuedLevelAdds, List<BodyVariantSelection> selections)
+    public bool HasMutation(string partId, BodyPartVariantSO variant)
+    {
+        var state = GetState(partId);
+
+        if (state == null || variant == null)
+            return false;
+
+        return state.appliedVariants.Exists(v => v != null && v.variant == variant);
+    }
+
+    public bool HasOrgan(BodyPartDefinitionSO organ)
+    {
+        if (organ == null)
+            return false;
+
+        return partDefinitions.Any(x => x != null && x.partId == organ.partId);
+    }
+
+    public void AddOrgan(BodyPartDefinitionSO organ)
+    {
+        if (organ == null)
+            return;
+
+        if (partDefinitions == null)
+            partDefinitions = new List<BodyPartDefinitionSO>();
+
+        if (partDefinitions.Contains(organ))
+            return;
+
+        partDefinitions.Add(organ);
+
+        EnsureStates();
+
+        OnBodyChanged?.Invoke();
+    }
+
+    public void ApplyMutations(Dictionary<string, int> queuedLevelAdds, List<BodyVariantSelection> selections)
     {
         if (queuedLevelAdds != null)
         {

@@ -13,7 +13,8 @@ public enum BodyPartType
     Chitin,
     Jaws,
     Legs,
-    Body
+    Body,
+    Bonus
 }
 
 public enum BodyHitboxSlot

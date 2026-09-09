@@ -57,10 +57,10 @@ public class BodyVisualController : MonoBehaviour
                 continue;
 
             var state = body.GetState(slot.partId);
-            if (state == null || state.definition == null)
+            if (state == null || state.organ == null)
                 continue;
 
-            slot.baseRenderer.sprite = state.definition.baseSprite;
+            slot.baseRenderer.sprite = state.organ.baseSprite;
             slot.baseRenderer.enabled = slot.baseRenderer.sprite != null;
 
             ClearChildren(slot.overlayRoot);

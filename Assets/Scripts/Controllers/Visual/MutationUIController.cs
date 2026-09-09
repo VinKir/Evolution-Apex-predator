@@ -34,7 +34,6 @@ public class MutationUIController : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMP_Text biomassText;
     [SerializeField] private Button mutateButton;
-    [SerializeField] private Button evolveButton;
     [SerializeField] private Button closeButton;
     [SerializeField] private Transform rowsRoot;
     [SerializeField] private BodyPartRowUI rowPrefab;
@@ -61,9 +60,6 @@ public class MutationUIController : MonoBehaviour
     {
         if (mutateButton != null)
             mutateButton.onClick.AddListener(OnMutatePressed);
-
-        if (evolveButton != null)
-            evolveButton.onClick.AddListener(OnEvolvePressed);
 
         if (closeButton != null)
             closeButton.onClick.AddListener(ClosePanel);
@@ -139,14 +135,14 @@ public class MutationUIController : MonoBehaviour
 
         foreach (var state in body.States)
         {
-            if (state == null || state.definition == null)
+            if (state == null || state.organ == null)
                 continue;
 
-            if (rows.ContainsKey(state.definition.partId))
+            if (rows.ContainsKey(state.organ.partId))
                 continue;
 
             var row = Instantiate(rowPrefab, rowsRoot);
-            rows.Add(state.definition.partId, row);
+            rows.Add(state.organ.partId, row);
         }
     }
 
@@ -170,13 +166,13 @@ public class MutationUIController : MonoBehaviour
 
         foreach (var state in body.States)
         {
-            if (state == null || state.definition == null)
+            if (state == null || state.organ == null)
                 continue;
 
-            if (!rows.TryGetValue(state.definition.partId, out var row) || row == null)
+            if (!rows.TryGetValue(state.organ.partId, out var row) || row == null)
                 continue;
 
-            int queuedAdds = GetQueuedAdds(state.definition.partId);
+            int queuedAdds = GetQueuedAdds(state.organ.partId);
             int currentLevel = state.level;
             int nextCost = currentLevel + queuedAdds + 1;
 
@@ -184,22 +180,19 @@ public class MutationUIController : MonoBehaviour
             bool canAfford = progression != null && progression.Biomass >= (pendingCost + nextCost);
 
             row.Bind(
-                state.definition.displayName,
+                state.organ.displayName,
                 currentLevel,
                 queuedAdds,
                 nextCost,
                 blockedByLimit,
                 canAfford,
                 mutationInProgress || (variantWindow != null && variantWindow.IsOpen),
-                () => OnUpgradeClicked(state.definition.partId)
+                () => OnUpgradeClicked(state.organ.partId)
             );
         }
 
         if (mutateButton != null)
             mutateButton.interactable = !mutationInProgress && pendingCost > 0f;
-
-        if (evolveButton != null)
-            evolveButton.interactable = !mutationInProgress && progression != null && progression.CanEvolve;
     }
 
     private void OnUpgradeClicked(string partId)
@@ -208,7 +201,7 @@ public class MutationUIController : MonoBehaviour
             return;
 
         var state = body.GetState(partId);
-        if (state == null || state.definition == null)
+        if (state == null || state.organ == null)
             return;
 
         int queuedAdds = GetQueuedAdds(partId);
@@ -274,11 +267,11 @@ public class MutationUIController : MonoBehaviour
 
         foreach (var state in body.States)
         {
-            if (state == null || state.definition == null)
+            if (state == null || state.organ == null)
                 continue;
 
             int current = state.level;
-            int queued = GetQueuedAdds(state.definition.partId);
+            int queued = GetQueuedAdds(state.organ.partId);
             int target = current + queued;
 
             for (int lvl = current + 1; lvl <= target; lvl++)
@@ -287,7 +280,7 @@ public class MutationUIController : MonoBehaviour
                     continue;
 
                 // Все варианты для этого milestone уровня
-                var allOptions = state.definition.GetVariantsForLevel(lvl);
+                var allOptions = state.organ.GetVariantsForLevel(lvl);
 
                 if (allOptions == null || allOptions.Count == 0)
                     continue;
@@ -301,7 +294,7 @@ public class MutationUIController : MonoBehaviour
                 // Уже выбранные в текущей очереди мутации
                 var alreadyChosenThisSession = chosenVariants
                     .Where(v => v != null &&
-                                v.partId == state.definition.partId &&
+                                v.partId == state.organ.partId &&
                                 v.variant != null)
                     .Select(v => v.variant)
                     .ToHashSet();
@@ -320,8 +313,8 @@ public class MutationUIController : MonoBehaviour
 
                 requestQueue.Enqueue(new MilestoneRequest
                 {
-                    partId = state.definition.partId,
-                    partDisplayName = state.definition.displayName,
+                    partId = state.organ.partId,
+                    partDisplayName = state.organ.displayName,
                     milestoneLevel = lvl,
                     options = availableOptions
                 });
@@ -407,7 +400,7 @@ public class MutationUIController : MonoBehaviour
     {
         mutationInProgress = false;
 
-        body.ApplyMutation(pendingLevelAdds, chosenVariants);
+        body.ApplyMutations(pendingLevelAdds, chosenVariants);
 
         if (playerCombatant != null)
             playerCombatant.RecalculateStats();
@@ -439,35 +432,6 @@ public class MutationUIController : MonoBehaviour
         RefreshAll();
     }
 
-    private void OnEvolvePressed()
-    {
-        if (progression == null || body == null || mutationInProgress)
-            return;
-
-        if (!progression.CanEvolve)
-        {
-            alertPopup?.Show("Эволюция доступна только на максимальном уровне.");
-            return;
-        }
-
-        progression.Evolve();
-
-        if (playerCombatant != null)
-            playerCombatant.RecalculateStats();
-
-        pendingLevelAdds.Clear();
-        chosenVariants.Clear();
-        requestQueue.Clear();
-
-        body.EnsureStates();
-        worldBodyVisual?.RebuildFromBody();
-        previewBodyVisual?.RebuildFromBody();
-
-        RefreshAll();
-
-        ClosePanel();
-    }
-
     private int GetQueuedAdds(string partId)
     {
         return pendingLevelAdds.TryGetValue(partId, out int value) ? value : 0;
@@ -482,10 +446,10 @@ public class MutationUIController : MonoBehaviour
 
         foreach (var state in body.States)
         {
-            if (state == null || state.definition == null)
+            if (state == null || state.organ == null)
                 continue;
 
-            int queued = GetQueuedAdds(state.definition.partId);
+            int queued = GetQueuedAdds(state.organ.partId);
             for (int i = 1; i <= queued; i++)
             {
                 total += state.level + i;

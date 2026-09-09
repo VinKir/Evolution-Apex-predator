@@ -24,6 +24,9 @@ public class EnemySpawner : MonoBehaviour
     [Header("Culling")]
     [SerializeField] private float despawnDistance = 45f;
 
+    [Header("Temp")]
+    [SerializeField] private EvolutionSO evolution;
+
     private float nextRoamSpawnTime;
 
     private void Start()
@@ -100,14 +103,11 @@ public class EnemySpawner : MonoBehaviour
                 Mathf.Max(2, PlayerLevel() + template.maxLevelOffset + 1)
             );
 
-            int evo = Random.Range(
-                Mathf.Max(1, PlayerEvo() + template.minEvolutionOffset),
-                Mathf.Max(2, PlayerEvo() + template.maxEvolutionOffset + 1)
-            );
+            EvolutionSO _evolution = evolution; // TODO: брать какие-то эволюции в пределах игрока с некоторым разбросом и шансом - или в зависимости от региона
 
             int groupId = basePoint != null ? basePoint.factionGroupId : Random.Range(1000, 9999);
 
-            combatant.ConfigureEnemy(template, level, evo, groupId);
+            combatant.ConfigureEnemy(template, level, _evolution, groupId);
         }
 
         if (ai != null)

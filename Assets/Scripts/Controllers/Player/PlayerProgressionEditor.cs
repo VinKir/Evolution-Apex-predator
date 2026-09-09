@@ -41,13 +41,6 @@ public class PlayerProgressionEditor : Editor
             p.AddBiomass(10f);
             EditorUtility.SetDirty(p);
         }
-
-        if (GUILayout.Button("Force Evolve"))
-        {
-            Undo.RecordObject(p, "Evolve");
-            p.Evolve();
-            EditorUtility.SetDirty(p);
-        }
     }
 }
 #endif

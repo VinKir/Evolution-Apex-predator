@@ -6230,6 +6230,7 @@ MonoBehaviour:
   roamMinSpawnDistance: 12
   roamMaxSpawnDistance: 24
   despawnDistance: 45
+  evolution: {fileID: 0}
 --- !u!4 &1348646517
 Transform:
   m_ObjectHideFlags: 0
@@ -6700,7 +6701,6 @@ MonoBehaviour:
   panelCanvasGroup: {fileID: 1823417023}
   biomassText: {fileID: 885877531}
   mutateButton: {fileID: 711371364}
-  evolveButton: {fileID: 714503286}
   closeButton: {fileID: 1961232020}
   rowsRoot: {fileID: 580963088}
   rowPrefab: {fileID: 6977277602275532582, guid: c92dbd19b80a7c04bbe84656af1aad32, type: 3}
@@ -7187,11 +7187,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e140b12a75b17894fac7a33d551c6a14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProgression
+  combatant: {fileID: 1580907988}
+  startingEvolution: {fileID: 0}
   level: 1
   experience: 0
   experienceToNextLevel: 10
-  evolutionStage: 1
-  mutationCap: 5
+  currentEvolution: {fileID: 0}
+  evolutionPoints: 0
+  strengthExt: 0
+  strengthInt: 0
+  enduranceExt: 0
+  enduranceInt: 0
+  achievementFlags: []
   biomass: 0
 --- !u!50 &1580907983
 Rigidbody2D:

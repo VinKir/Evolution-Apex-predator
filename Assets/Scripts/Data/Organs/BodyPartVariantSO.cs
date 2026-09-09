@@ -7,10 +7,13 @@ public class BodyPartVariantSO : ScriptableObject
 {
     public string variantId;
     public string displayName;
+    public BodyPartDefinitionSO bodyPart;
     public int unlockLevel = 5;
 
     [TextArea(minLines: 5, maxLines: 50)]
     public string description;
+
+    public int priceInEvolutionPoints;
 
     public Sprite overlaySprite;
     public List<BodyStatModifier> modifiers = new List<BodyStatModifier>();

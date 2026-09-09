@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public struct AttackPacket
@@ -23,11 +22,6 @@ public struct AttackPacket
 
 public struct OrganismRuntimeStats
 {
-    public float strengthExt;
-    public float strengthInt;
-    public float enduranceExt;
-    public float enduranceInt;
-
     public float maxChitinHp;
     public float maxBodyHp;
     public float maxJawHp;
@@ -128,7 +122,7 @@ public class OrganismCombatant : MonoBehaviour
     public int FactionGroupId => factionGroupId;
     public int Level => progression != null ? progression.Level : 1;
     public int EvolutionStage => progression != null ? progression.EvolutionStage : 1;
-    public float CombatPower => Stats.strengthExt + Stats.strengthInt + Stats.enduranceExt + Stats.enduranceInt + Level + EvolutionStage * 10;
+    public float CombatPower => progression.StrengthExt + progression.StrengthInt + progression.EnduranceExt + progression.EnduranceInt + Level + EvolutionStage * 10;
 
     public event Action<OrganismCombatant> OnDamagedBy;
     public event Action OnChitinHpChanged;
@@ -260,7 +254,7 @@ public class OrganismCombatant : MonoBehaviour
             playerBody.OnBodyChanged -= RecalculateStats;
     }
 
-    public void ConfigureEnemy(EnemyTemplateSO template, int level, int evoStage, int groupId)
+    public void ConfigureEnemy(EnemyTemplateSO template, int level, EvolutionSO evolution, int groupId)
     {
         isPlayer = false;
         enemyTemplate = template;
@@ -270,7 +264,7 @@ public class OrganismCombatant : MonoBehaviour
             progression = GetComponent<OrganismProgression>() ?? gameObject.AddComponent<OrganismProgression>();
         progression.OnEvolve -= RecalculateStats;
         progression.OnEvolve += RecalculateStats;
-        progression.InitializeRuntime(level, evoStage);
+        progression.InitializeRuntime(level, evolution);
 
         RecalculateStats();
     }
@@ -310,44 +304,29 @@ public class OrganismCombatant : MonoBehaviour
 
     private OrganismRuntimeStats BuildStats()
     {
-        int level = Level;
-        int evo = EvolutionStage;
-        level = Mathf.Max(1, level);
-        evo = Mathf.Max(1, evo);
-
-        float levelFactor = 1f + 0.01f * Mathf.Max(0, level - 1);
-        float evoFactor = 1f + 0.10f * Mathf.Max(0, evo - 1);
-
         CombatBonusAccumulator bonus = AggregateBonuses();
-
         OrganismRuntimeStats s = new OrganismRuntimeStats();
 
-        // TODO: значения strengthExt и т.д. должны повышаться игроком, он сам выбирает при эволюции какую характеристику увеличить
-        s.strengthExt = 1.0f * levelFactor * evoFactor;
-        s.strengthInt = 1.0f * levelFactor * evoFactor;
-        s.enduranceExt = 1.0f * levelFactor * evoFactor;
-        s.enduranceInt = 1.0f * levelFactor * evoFactor;
+        s.maxChitinHp = 2.5f * progression.EnduranceExt * (1f + bonus.maxChitinHpMult);
+        s.maxBodyHp = 1f * progression.EnduranceInt * (1f + bonus.maxBodyHpMult);
+        s.maxJawHp = 0.8f * progression.EnduranceInt * (1f + bonus.maxJawHpMult);
+        s.maxLegHp = 0.8f * progression.EnduranceInt * (1f + bonus.maxLegHpMult);
 
-        s.maxChitinHp = 2.5f * s.enduranceExt * (1f + bonus.maxChitinHpMult);
-        s.maxBodyHp = 1f * s.enduranceInt * (1f + bonus.maxBodyHpMult);
-        s.maxJawHp = 0.8f * s.enduranceInt * (1f + bonus.maxJawHpMult);
-        s.maxLegHp = 0.8f * s.enduranceInt * (1f + bonus.maxLegHpMult);
+        s.maxStamina = 5f + progression.StrengthInt + progression.EnduranceInt;
+        s.staminaRegen = 0.2f + progression.StrengthInt + progression.EnduranceInt;
 
-        s.maxStamina = 5f + s.strengthInt + s.enduranceInt;
-        s.staminaRegen = 0.2f + s.strengthInt + s.enduranceInt;
-
-        s.attackDamage = s.strengthExt * (1f + bonus.attackDamageMult);
+        s.attackDamage = progression.StrengthExt * (1f + bonus.attackDamageMult);
 
         // TODO: сделать зависимость цены на движение и атаку от какого-то параметра, чтоб из-за высокой силы какой-то стоимость атаки и движения увеличивалась, а от чего-то другого уменьшалась
         s.staminaMoveCost = Mathf.Max(0.01f, 1f * (1f - bonus.staminaMoveCostReduction));
         s.staminaAttackCost = Mathf.Max(0.01f, 2f * (1f - bonus.staminaAttackCostReduction));
 
-        s.moveSpeed = (2f - s.strengthExt * 0.05f + s.strengthInt * 0.015f)
+        s.moveSpeed = (2f - progression.StrengthExt * 0.05f + progression.StrengthInt * 0.015f)
                       * (1f + bonus.moveSpeedMult);
 
-        s.turnSpeed = 6f * (1f + bonus.turnSpeedMult) * Mathf.Clamp(1f - s.strengthExt * 0.03f, 0.4f, 2f);
+        s.turnSpeed = 6f * (1f + bonus.turnSpeedMult) * Mathf.Clamp(1f - progression.StrengthExt * 0.03f, 0.4f, 2f);
 
-        s.sizeMultiplier = (s.strengthExt * 0.08f - s.strengthInt * 0.03f) * (1f +  bonus.sizeMult);
+        s.sizeMultiplier = (progression.StrengthExt * 0.08f - progression.StrengthInt * 0.03f) * (1f +  bonus.sizeMult);
 
         s.detectionRadius = 4.5f * s.sizeMultiplier * (1f - bonus.detectRadiusReduction);
 
@@ -390,40 +369,20 @@ public class OrganismCombatant : MonoBehaviour
     {
         CombatBonusAccumulator bonuses = default;
         int evolutionStage = EvolutionStage;
-
+        IReadOnlyList<PlayerBody.BodyPartRuntimeState> states = null;
         if (isPlayer && playerBody != null)
-        {
-            foreach (var state in playerBody.States)
-            {
-                if (state == null)
-                    continue;
-
-                foreach (var applied in state.appliedVariants)
-                {
-                    if (applied?.variant == null)
-                        continue;
-
-                    foreach (var modifier in applied.variant.modifiers)
-                        AddModifier(ref bonuses, modifier, state.level, evolutionStage);
-                }
-            }
-        }
+            states=playerBody.States;
         else if (!isPlayer && enemyTemplate != null)
+            states=enemyTemplate.bodyParts;
+        
+        foreach (var state in states)
         {
-            foreach (var state in enemyTemplate.bodyParts)
-            {
-                if (state == null)
-                    continue;
+            foreach (var modifier in state.organ.modifiers)
+                    AddModifier(ref bonuses, modifier, state.level, evolutionStage);
 
-                foreach (var applied in state.appliedVariants)
-                {
-                    if (applied?.variant == null)
-                        continue;
-
-                    foreach (var modifier in applied.variant.modifiers)
-                        AddModifier(ref bonuses, modifier, state.level, evolutionStage);
-                }
-            }
+            foreach (var applied in state.appliedVariants)
+                foreach (var modifier in applied.variant.modifiers)
+                    AddModifier(ref bonuses, modifier, state.level, evolutionStage);
         }
 
         return bonuses;

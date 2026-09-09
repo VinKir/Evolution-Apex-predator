@@ -31,7 +31,7 @@ public class EnemyTemplateSO : ScriptableObject
     public float baseDetectionRadiusMax = 7f;
 
     [Header("Mutations")]
-    public List<PlayerBody.BodyPartRuntimeState> bodyParts = new();
+    public List<PlayerBody.BodyPartRuntimeState> bodyParts = new(); // TODO: убрать. Части тела у всех должны быть из PlayerBody (переименовать в OrganismBody)
 
     [Header("Death Drop")]
     public float corpseBiomassMultiplier = 1f;
