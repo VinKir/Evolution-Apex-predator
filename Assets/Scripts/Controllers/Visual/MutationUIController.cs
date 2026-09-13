@@ -178,9 +178,13 @@ public class MutationUIController : MonoBehaviour
 
             bool blockedByLimit = nextCost > (progression != null ? progression.MutationCap : 5);
             bool canAfford = progression != null && progression.Biomass >= (pendingCost + nextCost);
+            string displayName = "";
+            foreach (var applied_mutation in state.appliedVariants)
+                displayName += applied_mutation.variant.displayName + " ";
+            displayName += state.organ.displayName;
 
             row.Bind(
-                state.organ.displayName,
+                displayName,
                 currentLevel,
                 queuedAdds,
                 nextCost,
