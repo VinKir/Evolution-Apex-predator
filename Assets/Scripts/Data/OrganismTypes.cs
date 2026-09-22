@@ -6,6 +6,10 @@ public static class CombatSettings
     public const float BaseInternalDamageMultiplier = 0.3f; // percent 0.3 - 30%
     public const float BleedingTickInterval = 1f; // in seconds
     public const float BaseRegrowCooldown = 180f; // in seconds
+    public const float MinRegrowCooldown = 20f; // in seconds
+    public const float BaseRegenPeriod = 3f; // in seconds
+    public const float MinRegenPeriod = 0.5f; // in seconds
+    public const float AccidentalDeathCheckInterval = 60f; // in seconds
 }
 
 public enum BodyPartType
@@ -61,18 +65,25 @@ public enum BodyStatType
     MaxLegHpMult,
     DetectRadiusReduction,
     SizeMult,
-    ChitinRegenPerSec,
-    JawsRegenPerSec,
-    LegsRegenPerSec,
-    BodyRegenPerSec,
     AttackVsHealthyMult,
     AttackVsLowMult,
+    BodyRegenPeriodReduction,
+    BodyRegenPercent,
+    ChitinRegenPeriodReduction,
+    ChitinRegenPercent,
+    JawsRegenPeriodReduction,
+    JawsRegenPercent,
+    LegsRegenPeriodReduction,
+    LegsRegenPercent,
     JawsRegrowPercent,
     LegsRegrowPercent,
     ChitinRegrowPercent,
     JawsRegrowCooldownReduction,
     LegsRegrowCooldownReduction,
-    ChitinRegrowCooldownReduction
+    ChitinRegrowCooldownReduction,
+    MaxStaminaMult,
+    StaminaRecoveryMult,
+    AccidentalDeathChance
 }
 
 [Serializable]
@@ -114,12 +125,16 @@ public struct CombatBonusAccumulator
     public float maxLegHpMult;
     public float detectRadiusReduction;
     public float sizeMult;
-    public float chitinRegenPerSec;
-    public float jawsRegenPerSec;
-    public float legsRegenPerSec;
-    public float bodyRegenPerSec;
     public float attackVsHealthyMult;
     public float attackVsLowMult;
+    public float bodyRegenPeriodReduction;
+    public float bodyRegenPercent;
+    public float chitinRegenPeriodReduction;
+    public float chitinRegenPercent;
+    public float jawsRegenPeriodReduction;
+    public float jawsRegenPercent;
+    public float legsRegenPeriodReduction;
+    public float legsRegenPercent;
     // percent (0..1) of max HP to which the part will be restored when regrow ability is used.
     // 0 means ability not available.
     public float jawsRegrowPercent;
@@ -129,4 +144,7 @@ public struct CombatBonusAccumulator
     public float jawsRegrowCooldownReduction;
     public float legsRegrowCooldownReduction;
     public float chitinRegrowCooldownReduction;
+    public float maxStaminaMult;
+    public float staminaRecoveryMult;
+    public float accidentalDeathChance;
 }

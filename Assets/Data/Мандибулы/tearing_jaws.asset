@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: tearing_jaws
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
   variantId: 002002
-  displayName: "\u0420\u0430\u0437\u0440\u044B\u0432\u0430\u044E\u0449\u0438\u0435
-    \u043C\u0430\u043D\u0434\u0438\u0431\u0443\u043B\u044B"
+  displayName: "\u0420\u0430\u0437\u0440\u044B\u0432\u0430\u044E\u0449\u0438\u0435"
   bodyPart: {fileID: 11400000, guid: c707ddb3ff0771849bb947a94b8611d7, type: 2}
   unlockLevel: 5
   description: "\u041D\u0430 \u043A\u0440\u0430\u044F\u0445 \u0447\u0435\u043B\u044E\u0441\u0442\u0435\u0439
@@ -34,7 +33,7 @@ MonoBehaviour:
     \u0441 \u0442\u0430\u043A\u043E\u0439 \u043F\u0430\u0441\u0442\u044C\u044E \u043E\u0441\u0442\u0430\u0432\u043B\u044F\u0435\u0442
     \u0434\u043E\u043B\u0433\u0438\u0439 \u0438 \u0431\u043E\u043B\u0435\u0437\u043D\u0435\u043D\u043D\u044B\u0439
     \u0441\u043B\u0435\u0434."
-  priceInEvolutionPoints: 0
+  priceInEvolutionPoints: 1
   overlaySprite: {fileID: 21300000, guid: 50de360dd0a28dd4983288440b46550f, type: 3}
   modifiers:
   - stat: 13

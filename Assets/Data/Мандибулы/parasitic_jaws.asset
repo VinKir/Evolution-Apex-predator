@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: parasitic_jaws
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
   variantId: 002005
-  displayName: "\u041F\u0430\u0440\u0430\u0437\u0438\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0435
-    \u043C\u0430\u043D\u0434\u0438\u0431\u0443\u043B\u044B"
+  displayName: "\u041F\u0430\u0440\u0430\u0437\u0438\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0435"
   bodyPart: {fileID: 11400000, guid: c707ddb3ff0771849bb947a94b8611d7, type: 2}
   unlockLevel: 5
   description: "\u0412\u043D\u0443\u0442\u0440\u0438 \u0447\u0435\u043B\u044E\u0441\u0442\u043D\u043E\u0433\u043E
@@ -33,7 +32,7 @@ MonoBehaviour:
     \u043D\u0435 \u0442\u043E\u043B\u044C\u043A\u043E \u043E\u0440\u0443\u0436\u0438\u0435\u043C,
     \u043D\u043E \u0438 \u0441\u043F\u043E\u0441\u043E\u0431\u043E\u043C \u043F\u043E\u0434\u043F\u0438\u0442\u043A\u0438
     \u0432 \u0437\u0430\u0442\u044F\u0436\u043D\u043E\u0439 \u0441\u0445\u0432\u0430\u0442\u043A\u0435."
-  priceInEvolutionPoints: 0
+  priceInEvolutionPoints: 1
   overlaySprite: {fileID: 21300000, guid: 95daf4bff1353aa48806f0148e08fe33, type: 3}
   modifiers:
   - stat: 15

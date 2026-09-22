@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a801771aa8fa704492fd0714a0f6078, type: 3}
+  m_Name: BaseEvolution
+  m_EditorClassIdentifier: Assembly-CSharp::EvolutionSO
+  evolutionStage: 0
+  evolutionId: 0000
+  displayName: "\u041B\u043E\u0445\u043E\u0432\u0441\u043A\u0430\u044F \u043B\u0438\u0447\u0438\u043D\u043A\u0430"
+  description: "\u0421\u0430\u043C\u0430\u044F \u0431\u0430\u0437\u043E\u0432\u0430\u044F
+    \u0444\u043E\u0440\u043C\u0430 \u0436\u0438\u0437\u043D\u0438, \u0434\u043B\u044F
+    \u043F\u043E\u043B\u043D\u044B\u0445 \u0447\u0430\u0439\u043D\u0438\u043A\u043E\u0432,
+    \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u0435\u0449\u0451 \u043D\u0438\u0447\u0435\u0433\u043E
+    \u043D\u0435 \u043C\u043E\u0433\u0443\u0442. \u041D\u043E\u0436\u043A\u0438,
+    \u0440\u043E\u0442 \u0438 \u0442\u0443\u043B\u043E\u0432\u0438\u0449\u0435 -
+    \u0432\u043E\u0442 \u0438 \u0432\u0441\u0451, \u0447\u0442\u043E \u0435\u0441\u0442\u044C
+    \u0443 \u044D\u0442\u043E\u0433\u043E \u0436\u0430\u043B\u043A\u043E\u0433\u043E
+    \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0430."
+  strengthExtBonus: 10
+  strengthIntBonus: 10
+  enduranceExtBonus: 10
+  enduranceIntBonus: 10
+  mutations: []
+  organs:
+  - {fileID: 11400000, guid: 852d36b9701a9574d8b22c9b43a05629, type: 2}
+  - {fileID: 11400000, guid: c707ddb3ff0771849bb947a94b8611d7, type: 2}
+  - {fileID: 11400000, guid: f2c594c61e99dac4c860aab4ca3d41f8, type: 2}
+  purchasableOrgans: []
+  nextEvolutions:
+  - {fileID: 11400000, guid: 8484279b9fd09da45bbcb86f6ab1caaa, type: 2}
+  - {fileID: 11400000, guid: af9badfc402a83b448c5010daa08d03e, type: 2}
+  requirements: []
+  evolutionDuration: 10

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: armored_legs
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
   variantId: 003006
-  displayName: "\u0411\u0440\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0435
-    \u043D\u043E\u0433\u0438"
+  displayName: "\u0411\u0440\u043E\u043D\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0435"
+  bodyPart: {fileID: 11400000, guid: f2c594c61e99dac4c860aab4ca3d41f8, type: 2}
   unlockLevel: 5
   description: "\u041F\u043E\u0432\u0435\u0440\u0445\u043D\u043E\u0441\u0442\u044C
     \u043B\u0430\u043F\u043E\u043A \u043F\u043E\u043A\u0440\u044B\u0432\u0430\u0435\u0442\u0441\u044F
@@ -32,6 +32,7 @@ MonoBehaviour:
     \u043A\u043E\u043D\u0435\u0447\u043D\u043E\u0441\u0442\u0435\u0439 \u0438 \u0441\u043D\u0438\u0436\u0430\u0435\u0442
     \u0440\u0438\u0441\u043A \u0431\u044B\u0441\u0442\u0440\u043E\u0433\u043E \u0432\u044B\u0432\u043E\u0434\u0430
     \u0438\u0445 \u0438\u0437 \u0441\u0442\u0440\u043E\u044F."
+  priceInEvolutionPoints: 1
   overlaySprite: {fileID: 21300000, guid: 87efe95526f45634a8da537c525d9850, type: 3}
   modifiers:
   - stat: 10

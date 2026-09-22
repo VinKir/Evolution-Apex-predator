@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: regenerating_legs
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
   variantId: 003007
-  displayName: "\u0420\u0435\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u0443\u044E\u0449\u0438\u0435
-    \u043D\u043E\u0433\u0438"
+  displayName: "\u0420\u0435\u0433\u0435\u043D\u0435\u0440\u0438\u0440\u0443\u044E\u0449\u0438\u0435"
+  bodyPart: {fileID: 11400000, guid: f2c594c61e99dac4c860aab4ca3d41f8, type: 2}
   unlockLevel: 5
   description: "\u0412 \u0442\u043A\u0430\u043D\u044F\u0445 \u043B\u0430\u043F\u043E\u043A
     \u0443\u0441\u043A\u043E\u0440\u044F\u044E\u0442\u0441\u044F \u043F\u0440\u043E\u0446\u0435\u0441\u0441\u044B
@@ -31,9 +31,14 @@ MonoBehaviour:
     \u0443\u0441\u0442\u043E\u0439\u0447\u0438\u0432\u044B\u043C\u0438 \u043A \u0437\u0430\u0442\u044F\u0436\u043D\u044B\u043C
     \u0441\u0442\u043E\u043B\u043A\u043D\u043E\u0432\u0435\u043D\u0438\u044F\u043C
     \u0438 \u043C\u0435\u043B\u043A\u0438\u043C \u0442\u0440\u0430\u0432\u043C\u0430\u043C."
+  priceInEvolutionPoints: 1
   overlaySprite: {fileID: 21300000, guid: f89c84bedd97951408aafcb2531f264c, type: 3}
   modifiers:
-  - stat: 29
-    value: 1
-    perLevel: 0.05
-    perEvolutionStage: 0.5
+  - stat: 36
+    value: 0.01
+    perLevel: 0.001
+    perEvolutionStage: 0.01
+  - stat: 35
+    value: 0.1
+    perLevel: 0.03
+    perEvolutionStage: 0.3

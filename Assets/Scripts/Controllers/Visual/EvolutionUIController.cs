@@ -6,10 +6,10 @@ using UnityEngine.UI;
 
 public class EvolutionPurchasePlan
 {
-    public int strengthExt;
-    public int strengthInt;
-    public int enduranceExt;
-    public int enduranceInt;
+    public int strengthExt = 0;
+    public int strengthInt = 0;
+    public int enduranceExt = 0;
+    public int enduranceInt = 0;
 
     public readonly List<BodyPartDefinitionSO> purchasedOrgans = new();
 
@@ -44,6 +44,7 @@ public class EvolutionUIController : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button confirmEvolutionButton;
     [SerializeField] private Button additionalButton;
+    [SerializeField] private Button openEvoPanelButton;
     [SerializeField] private Button closeButton;
     
     [Header("Purchases")]
@@ -58,6 +59,12 @@ public class EvolutionUIController : MonoBehaviour
     [SerializeField] private TMP_Text selectedOrganDescriptionText;
     [SerializeField] private Button selectOrganButton;
     [SerializeField] private TMP_Text selectOrganButtonText;
+
+    [Header("Stat Rows")]
+    [SerializeField] private EvolutionStatRowUI strengthExtRow;
+    [SerializeField] private EvolutionStatRowUI strengthIntRow;
+    [SerializeField] private EvolutionStatRowUI enduranceExtRow;
+    [SerializeField] private EvolutionStatRowUI enduranceIntRow;
 
     [Header("Popup")]
     [SerializeField] private SimplePopupUI alertPopup;
@@ -82,7 +89,33 @@ public class EvolutionUIController : MonoBehaviour
     {
         confirmEvolutionButton?.onClick.AddListener(OnConfirmEvolution);
         additionalButton?.onClick.AddListener(OpenPurchases);
+        openEvoPanelButton?.onClick.AddListener(Open);
         closeButton?.onClick.AddListener(Close);
+
+        purchasePlan = new EvolutionPurchasePlan();
+
+        strengthExtRow?.Initialize(this);
+        strengthIntRow?.Initialize(this);
+        enduranceExtRow?.Initialize(this);
+        enduranceIntRow?.Initialize(this);
+    }
+
+    private void Update()
+    {
+        openEvoPanelButton.interactable = progression.CanEvolve;
+
+        if (!evolutionInProgress)
+            return;
+
+        evolutionTimer += Time.deltaTime;
+
+        float duration = Mathf.Max(0.1f, selectedEvolution.evolutionDuration);
+        float progress = Mathf.Clamp01(evolutionTimer / duration);
+
+        worldProgressUI?.SetMutationProgress(progress, true);
+
+        if (evolutionTimer >= duration)
+            FinishEvolution();
     }
 
     public void Open()
@@ -186,7 +219,7 @@ public class EvolutionUIController : MonoBehaviour
         evolutionNameText.text = selectedEvolution.displayName;
         evolutionDescriptionText.text = selectedEvolution.description;
         evolutionBonusesText.text = BuildEvolutionSummary();
-        confirmEvolutionButton.interactable = !evolutionInProgress && purchasePlan.EvolutionPointsSpent >= progression.EvolutionPoints;
+        confirmEvolutionButton.interactable = !evolutionInProgress && purchasePlan.EvolutionPointsSpent >= GetRemainingEvolutionPoints();
     }
 
     private string BuildEvolutionSummary()
@@ -237,12 +270,92 @@ public class EvolutionUIController : MonoBehaviour
         return progression.EvolutionPoints - purchasePlan.EvolutionPointsSpent;
     }
 
+
+    #region BuyStats
+
+    private void RefreshStatRows()
+    {
+        strengthExtRow?.Refresh();
+        strengthIntRow?.Refresh();
+        enduranceExtRow?.Refresh();
+        enduranceIntRow?.Refresh();
+    }
+
+    public float GetInitialStatValue(EvolutionStatType stat)
+    {
+        return stat switch
+        {
+            EvolutionStatType.StrengthExt => progression.StrengthExt,
+            EvolutionStatType.StrengthInt => progression.StrengthInt,
+            EvolutionStatType.EnduranceExt => progression.EnduranceExt,
+            EvolutionStatType.EnduranceInt => progression.EnduranceInt,
+            _ => 0f
+        };
+    }
+    
+    public int GetStatIncrease(EvolutionStatType stat)
+    {
+        return Mathf.RoundToInt(stat switch
+        {
+            EvolutionStatType.StrengthExt => purchasePlan.strengthExt,
+            EvolutionStatType.StrengthInt => purchasePlan.strengthInt,
+            EvolutionStatType.EnduranceExt => purchasePlan.enduranceExt,
+            EvolutionStatType.EnduranceInt => purchasePlan.enduranceInt,
+            _ => 0
+        });
+    }
+
+    private void AddStatIncrease(EvolutionStatType stat)
+    {
+        switch (stat)
+        {
+            case EvolutionStatType.StrengthExt:
+                purchasePlan.strengthExt++;
+                break;
+            case EvolutionStatType.StrengthInt:
+                purchasePlan.strengthInt++;
+                break;
+            case EvolutionStatType.EnduranceExt:
+                purchasePlan.enduranceExt++;
+                break;
+            case EvolutionStatType.EnduranceInt:
+                purchasePlan.enduranceInt++;
+                break;
+        }
+    }
+
+    private void RemoveStatIncrease(EvolutionStatType stat)
+    {
+        switch (stat)
+        {
+            case EvolutionStatType.StrengthExt:
+                purchasePlan.strengthExt--;
+                break;
+            case EvolutionStatType.StrengthInt:
+                purchasePlan.strengthInt--;
+                break;
+            case EvolutionStatType.EnduranceExt:
+                purchasePlan.enduranceExt--;
+                break;
+            case EvolutionStatType.EnduranceInt:
+                purchasePlan.enduranceInt--;
+                break;
+        }
+    }
+
     public int GetStatUpgradeCost(int increaseNumber)
     {
         if (selectedEvolution == null)
             return 0;
 
         return selectedEvolution.evolutionStage * increaseNumber;
+    }
+
+    public int GetNextStatUpgradeCost(EvolutionStatType stat)
+    {
+        int currentIncrease = GetStatIncrease(stat);
+        int nextIncrease = currentIncrease + 1;
+        return GetStatUpgradeCost(nextIncrease);
     }
 
     public bool TryBuyStat(EvolutionStatType stat)
@@ -287,71 +400,9 @@ public class EvolutionUIController : MonoBehaviour
 
         return true;
     }
+    #endregion
 
-    private int GetStatIncrease(EvolutionStatType stat)
-    {
-        return Mathf.RoundToInt(stat switch
-        {
-            EvolutionStatType.StrengthExt =>
-                purchasePlan.strengthExt,
-
-            EvolutionStatType.StrengthInt =>
-                purchasePlan.strengthInt,
-
-            EvolutionStatType.EnduranceExt =>
-                purchasePlan.enduranceExt,
-
-            EvolutionStatType.EnduranceInt =>
-                purchasePlan.enduranceInt,
-
-            _ => 0
-        });
-    }
-
-    private void AddStatIncrease(EvolutionStatType stat)
-    {
-        switch (stat)
-        {
-            case EvolutionStatType.StrengthExt:
-                purchasePlan.strengthExt++;
-                break;
-
-            case EvolutionStatType.StrengthInt:
-                purchasePlan.strengthInt++;
-                break;
-
-            case EvolutionStatType.EnduranceExt:
-                purchasePlan.enduranceExt++;
-                break;
-
-            case EvolutionStatType.EnduranceInt:
-                purchasePlan.enduranceInt++;
-                break;
-        }
-    }
-
-    private void RemoveStatIncrease(EvolutionStatType stat)
-    {
-        switch (stat)
-        {
-            case EvolutionStatType.StrengthExt:
-                purchasePlan.strengthExt--;
-                break;
-
-            case EvolutionStatType.StrengthInt:
-                purchasePlan.strengthInt--;
-                break;
-
-            case EvolutionStatType.EnduranceExt:
-                purchasePlan.enduranceExt--;
-                break;
-
-            case EvolutionStatType.EnduranceInt:
-                purchasePlan.enduranceInt--;
-                break;
-        }
-    }
-
+    #region PurchaseOrgans
     private void RefreshSelectedOrgan()
     {
         if (selectedPurchaseOrgan == null)
@@ -442,6 +493,7 @@ public class EvolutionUIController : MonoBehaviour
     {
         return purchasePlan.purchasedOrgans.Contains(organ);
     }
+    #endregion
 
     private void RefreshPurchases()
     {
@@ -449,6 +501,7 @@ public class EvolutionUIController : MonoBehaviour
 
         BuildOrganPurchaseList();
         RefreshSelectedOrgan();
+        RefreshStatRows();
     }
 
     private void OnConfirmEvolution()
@@ -482,23 +535,6 @@ public class EvolutionUIController : MonoBehaviour
         movement.enabled = false;
 
         worldProgressUI?.SetMutationProgress(0f, true);
-    }
-
-    private void Update()
-    {
-        if (!evolutionInProgress)
-            return;
-
-        evolutionTimer += Time.deltaTime;
-
-        float duration = Mathf.Max(0.1f, selectedEvolution.evolutionDuration);
-
-        float progress = Mathf.Clamp01(evolutionTimer / duration);
-
-        worldProgressUI?.SetMutationProgress(progress, true);
-
-        if (evolutionTimer >= duration)
-            FinishEvolution();
     }
 
     private void FinishEvolution()

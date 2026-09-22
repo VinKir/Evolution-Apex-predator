@@ -51,11 +51,6 @@ public struct OrganismRuntimeStats
     public float jawsDamageMultiplierDealt;
     public float jawsDamageMultiplierTaken;
 
-    public float chitinRegenPerSec;
-    public float jawsRegenPerSec;
-    public float legsRegenPerSec;
-    public float bodyRegenPerSec;
-
     public float attackVsHealthyMult;
     public float attackVsLowMult;
 
@@ -70,6 +65,17 @@ public struct OrganismRuntimeStats
     public float jawsRegrowCooldown;
     public float legsRegrowCooldown;
     public float chitinRegrowCooldown;
+
+    public float bodyRegenPeriod;
+    public float bodyRegenPercent;
+    public float chitinRegenPeriod;
+    public float chitinRegenPercent;
+    public float jawsRegenPeriod;
+    public float jawsRegenPercent;
+    public float legsRegenPeriod;
+    public float legsRegenPercent;
+
+    public float accidentalDeathChance;
 }
 
 public class OrganismCombatant : MonoBehaviour
@@ -153,6 +159,13 @@ public class OrganismCombatant : MonoBehaviour
     private float lastRegrowJawsTime = -9999f;
     private float lastRegrowLegsTime = -9999f;
 
+    private float bodyRegenTimer;
+    private float chitinRegenTimer;
+    private float jawsRegenTimer;
+    private float legsRegenTimer;
+
+    private float accidentalDeathTimer;
+
     private void Awake()
     {
         if (rb == null)
@@ -223,16 +236,26 @@ public class OrganismCombatant : MonoBehaviour
         if (IsDead)
             return;
 
-        Regenerate(Time.deltaTime);
+        var dt = Time.deltaTime;
+
+        accidentalDeathTimer += dt;
+        if (Stats.accidentalDeathChance != 0 && accidentalDeathTimer >= CombatSettings.AccidentalDeathCheckInterval)
+        {
+            accidentalDeathTimer -= CombatSettings.AccidentalDeathCheckInterval;
+            if (UnityEngine.Random.value < Stats.accidentalDeathChance)
+                Die();
+        }
+
+        Regenerate(dt);
 
         if (movement != null && movement.IsSelfMoving)
         {
             float speed01 = Mathf.Clamp01(rb.linearVelocity.magnitude / Mathf.Max(0.01f, movement.CurrentMoveSpeed));
-            SpendStamina(Stats.staminaMoveCost * speed01 * Time.deltaTime);
+            SpendStamina(Stats.staminaMoveCost * speed01 * dt);
         }
         else
         {
-            RestoreStamina(Stats.staminaRegen * Time.deltaTime);
+            RestoreStamina(Stats.staminaRegen * dt);
         }
     }
 
@@ -312,8 +335,8 @@ public class OrganismCombatant : MonoBehaviour
         s.maxJawHp = 0.8f * progression.EnduranceInt * (1f + bonus.maxJawHpMult);
         s.maxLegHp = 0.8f * progression.EnduranceInt * (1f + bonus.maxLegHpMult);
 
-        s.maxStamina = 5f + progression.StrengthInt + progression.EnduranceInt;
-        s.staminaRegen = 0.2f + progression.StrengthInt + progression.EnduranceInt;
+        s.maxStamina = (5f + progression.StrengthInt + progression.EnduranceInt) * (1 + bonus.maxStaminaMult);
+        s.staminaRegen = (0.2f + progression.StrengthInt + progression.EnduranceInt) * (1 + bonus.staminaRecoveryMult);
 
         s.attackDamage = progression.StrengthExt * (1f + bonus.attackDamageMult);
 
@@ -344,10 +367,14 @@ public class OrganismCombatant : MonoBehaviour
         s.jawsDamageMultiplierTaken = bonus.jawsDamageMultiplierTaken;
         s.chitinReflectPercent = bonus.chitinReflectPercent;
 
-        s.chitinRegenPerSec = bonus.chitinRegenPerSec;
-        s.jawsRegenPerSec = bonus.jawsRegenPerSec;
-        s.legsRegenPerSec = bonus.legsRegenPerSec;
-        s.bodyRegenPerSec = bonus.bodyRegenPerSec;
+        s.bodyRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.bodyRegenPeriodReduction);
+        s.bodyRegenPercent = bonus.bodyRegenPercent;
+        s.chitinRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.chitinRegenPeriodReduction);
+        s.chitinRegenPercent = bonus.chitinRegenPercent;
+        s.jawsRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.jawsRegenPeriodReduction);
+        s.jawsRegenPercent = bonus.jawsRegenPercent;
+        s.legsRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.legsRegenPeriodReduction);
+        s.legsRegenPercent = bonus.legsRegenPercent;
 
         s.attackVsHealthyMult = 1f + Mathf.Max(0f, bonus.attackVsHealthyMult);
         s.attackVsLowMult = 1f + Mathf.Max(0f, bonus.attackVsLowMult);
@@ -358,9 +385,11 @@ public class OrganismCombatant : MonoBehaviour
         s.legsRegrowPercent = bonus.legsRegrowPercent;
         s.chitinRegrowPercent = bonus.chitinRegrowPercent;
 
-        s.jawsRegrowCooldown = Mathf.Max(5f, CombatSettings.BaseRegrowCooldown - bonus.jawsRegrowCooldownReduction);
-        s.legsRegrowCooldown = Mathf.Max(5f, CombatSettings.BaseRegrowCooldown - bonus.legsRegrowCooldownReduction);
-        s.chitinRegrowCooldown = Mathf.Max(5f, CombatSettings.BaseRegrowCooldown - bonus.chitinRegrowCooldownReduction);
+        s.jawsRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.jawsRegrowCooldownReduction);
+        s.legsRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.legsRegrowCooldownReduction);
+        s.chitinRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.chitinRegrowCooldownReduction);
+
+        s.accidentalDeathChance = bonus.accidentalDeathChance;
 
         return s;
     }
@@ -369,11 +398,11 @@ public class OrganismCombatant : MonoBehaviour
     {
         CombatBonusAccumulator bonuses = default;
         int evolutionStage = EvolutionStage;
-        IReadOnlyList<PlayerBody.BodyPartRuntimeState> states = null;
-        if (isPlayer && playerBody != null)
-            states=playerBody.States;
-        else if (!isPlayer && enemyTemplate != null)
-            states=enemyTemplate.bodyParts;
+        IReadOnlyList<PlayerBody.BodyPartRuntimeState> states;
+        if (isPlayer) // TODO: переделать playerBody в organismBody, чтоб из одного места у всех существ брались части тела
+            states=playerBody?.States;
+        else
+            states=enemyTemplate?.bodyParts;
         
         foreach (var state in states)
         {
@@ -421,10 +450,14 @@ public class OrganismCombatant : MonoBehaviour
             case BodyStatType.MaxLegHpMult: bonuses.maxLegHpMult += value; break;
             case BodyStatType.DetectRadiusReduction: bonuses.detectRadiusReduction += value; break;
             case BodyStatType.SizeMult: bonuses.sizeMult += value; break;
-            case BodyStatType.ChitinRegenPerSec: bonuses.chitinRegenPerSec += value; break;
-            case BodyStatType.JawsRegenPerSec: bonuses.jawsRegenPerSec += value; break;
-            case BodyStatType.LegsRegenPerSec: bonuses.legsRegenPerSec += value; break;
-            case BodyStatType.BodyRegenPerSec: bonuses.bodyRegenPerSec += value; break;
+            case BodyStatType.BodyRegenPeriodReduction: bonuses.bodyRegenPeriodReduction += value; break;
+            case BodyStatType.BodyRegenPercent: bonuses.bodyRegenPercent += value; break;
+            case BodyStatType.ChitinRegenPeriodReduction: bonuses.chitinRegenPeriodReduction += value; break;
+            case BodyStatType.ChitinRegenPercent: bonuses.chitinRegenPercent += value; break;
+            case BodyStatType.JawsRegenPeriodReduction: bonuses.jawsRegenPeriodReduction += value; break;
+            case BodyStatType.JawsRegenPercent: bonuses.jawsRegenPercent += value; break;
+            case BodyStatType.LegsRegenPeriodReduction: bonuses.legsRegenPeriodReduction += value; break;
+            case BodyStatType.LegsRegenPercent: bonuses.legsRegenPercent += value; break;
             case BodyStatType.AttackVsHealthyMult: bonuses.attackVsHealthyMult += value; break;
             case BodyStatType.AttackVsLowMult: bonuses.attackVsLowMult += value; break;
             case BodyStatType.JawsRegrowPercent: bonuses.jawsRegrowPercent = Mathf.Max(bonuses.jawsRegrowPercent, value); break;
@@ -433,6 +466,9 @@ public class OrganismCombatant : MonoBehaviour
             case BodyStatType.JawsRegrowCooldownReduction: bonuses.jawsRegrowCooldownReduction += value; break;
             case BodyStatType.LegsRegrowCooldownReduction: bonuses.legsRegrowCooldownReduction += value; break;
             case BodyStatType.ChitinRegrowCooldownReduction: bonuses.chitinRegrowCooldownReduction += value; break;
+            case BodyStatType.MaxStaminaMult: bonuses.maxStaminaMult += value; break;
+            case BodyStatType.StaminaRecoveryMult: bonuses.staminaRecoveryMult += value; break;
+            case BodyStatType.AccidentalDeathChance: bonuses.accidentalDeathChance += value; break;
         }
     }
 
@@ -497,42 +533,62 @@ public class OrganismCombatant : MonoBehaviour
 
     private void Regenerate(float dt)
     {
-        if (Stats.chitinRegenPerSec > 0f && !chitinDisabled && CurrentChitinHp < Stats.maxChitinHp)
+        if (Stats.chitinRegenPeriod > 0f && !chitinDisabled && CurrentChitinHp < Stats.maxChitinHp)
         {
-            CurrentChitinHp = Mathf.Min(Stats.maxChitinHp, CurrentChitinHp + Stats.chitinRegenPerSec * dt * Stats.maxChitinHp);
-            OnChitinHpChanged?.Invoke();
-        }
-
-        if (Stats.bodyRegenPerSec > 0f && CurrentBodyHp < Stats.maxBodyHp)
-        {
-            CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + Stats.bodyRegenPerSec * dt * Stats.maxBodyHp);
-            OnBodyHpChanged?.Invoke();
-        }
-
-        if (Stats.jawsRegenPerSec > 0f && !jawsDisabled && CurrentJawsHp < Stats.maxJawHp)
-        {
-            CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + Stats.jawsRegenPerSec * dt * Stats.maxJawHp);
-            OnJawsHpChanged?.Invoke();
-        }
-
-        if (Stats.legsRegenPerSec > 0f && !legsDisabled)
-        {
-            bool changed = false;
-
-            if (CurrentLeftLegHp < Stats.maxLegHp)
+            chitinRegenTimer += dt;
+            if (chitinRegenTimer >= Stats.chitinRegenPeriod)
             {
-                CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
-                changed = true;
+                chitinRegenTimer -= Stats.chitinRegenPeriod;
+                CurrentChitinHp = Mathf.Min(Stats.maxChitinHp, CurrentChitinHp + Stats.chitinRegenPercent * Stats.maxChitinHp);
+                OnChitinHpChanged?.Invoke();
             }
+        }
 
-            if (CurrentRightLegHp < Stats.maxLegHp)
+        if (Stats.bodyRegenPeriod > 0f && CurrentBodyHp < Stats.maxBodyHp)
+        {
+            bodyRegenTimer += dt;
+            if (bodyRegenTimer >= Stats.bodyRegenPeriod)
             {
-                CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + Stats.legsRegenPerSec * dt * Stats.maxLegHp);
-                changed = true;
+                bodyRegenTimer -= Stats.bodyRegenPeriod;
+                CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + Stats.bodyRegenPercent * Stats.maxBodyHp);
+                OnBodyHpChanged?.Invoke();
             }
+        }
 
-            if (changed)
-                OnLegsHpChanged?.Invoke();
+        if (Stats.jawsRegenPeriod > 0f && !jawsDisabled && CurrentJawsHp < Stats.maxJawHp)
+        {
+            jawsRegenTimer += dt;
+            if (jawsRegenTimer >= Stats.jawsRegenPeriod)
+            {
+                jawsRegenTimer -= Stats.jawsRegenPeriod;
+                CurrentJawsHp = Mathf.Min(Stats.maxJawHp, CurrentJawsHp + Stats.jawsRegenPercent * Stats.maxJawHp);
+                OnJawsHpChanged?.Invoke();
+            }
+        }
+
+        if (Stats.legsRegenPeriod > 0f && !legsDisabled && (CurrentLeftLegHp < Stats.maxLegHp || CurrentRightLegHp < Stats.maxLegHp))
+        {
+            legsRegenTimer += dt;
+            if (legsRegenTimer >= Stats.legsRegenPeriod)
+            {
+                legsRegenTimer -= Stats.legsRegenPeriod;
+
+                bool changed = false;
+                if (CurrentLeftLegHp < Stats.maxLegHp)
+                {
+                    CurrentLeftLegHp = Mathf.Min(Stats.maxLegHp, CurrentLeftLegHp + Stats.legsRegenPercent * Stats.maxLegHp);
+                    changed = true;
+                }
+
+                if (CurrentRightLegHp < Stats.maxLegHp)
+                {
+                    CurrentRightLegHp = Mathf.Min(Stats.maxLegHp, CurrentRightLegHp + Stats.legsRegenPercent * Stats.maxLegHp);
+                    changed = true;
+                }
+
+                if (changed)
+                    OnLegsHpChanged?.Invoke();
+            }
         }
     }
 
@@ -677,7 +733,7 @@ public class OrganismCombatant : MonoBehaviour
             StartCoroutine(BleedRoutine(slot, directDamage * packet.bleedPercent, packet.bleedDurationSeconds));
 
         if (!plainDamage)
-            AwardAttackExperience(attacker, CurrentBodyHp <= 0f);
+            AwardAttack(attacker, CurrentBodyHp <= 0f);
 
         if (attacker != null && packet.lifestealPercent > 0f)
             attacker.HealMostDamagedPart(directDamage * packet.lifestealPercent);
@@ -696,7 +752,7 @@ public class OrganismCombatant : MonoBehaviour
         CheckDeath();
     }
 
-    private void AwardAttackExperience(OrganismCombatant attacker, bool killed)
+    private void AwardAttack(OrganismCombatant attacker, bool killed)
     {
         if (attacker == null || attacker.progression == null || progression == null)
             return;
@@ -708,7 +764,25 @@ public class OrganismCombatant : MonoBehaviour
             : 1;
 
         attacker.progression.AddExperience(experience);
-    }
+
+        if (!killed)
+            return;
+
+        int evolutionStageDifference =
+            progression.EvolutionStage - attacker.progression.EvolutionStage;
+
+        int evolutionPoints = evolutionStageDifference switch
+        {
+            1 => 2,
+            2 => 10,
+            3 => 100,
+            4 => 1000,
+            _ => 0
+        };
+
+        if (evolutionPoints > 0)
+            attacker.progression.ModifyEvolutionPoints(evolutionPoints);
+}
 
     private void ApplyChitinDamage(float amount, OrganismCombatant attacker)
     {

@@ -61,6 +61,14 @@ public class OrganismProgression : MonoBehaviour
 
     public OrganismCombatant Combatant => combatant;
 
+    private void Awake()
+    {
+        strengthExt = startingEvolution.strengthExtBonus;
+        strengthInt = startingEvolution.strengthIntBonus;
+        enduranceExt = startingEvolution.enduranceExtBonus;
+        enduranceInt = startingEvolution.enduranceIntBonus;
+    }
+
     //TODO: доделать генерацию врага. Характеристики сейчас берутся только у базовой эволюции, должны браться сумма за все эволюции
     public void InitializeRuntime(int initialLevel, EvolutionSO initialEvolution)
     {
@@ -131,7 +139,7 @@ public class OrganismProgression : MonoBehaviour
         int purchasedEnduranceInt,
         int evolutionPointsSpent)
     {
-        if (!SpendEvolutionPoints(evolutionPointsSpent))
+        if (!ModifyEvolutionPoints(-evolutionPointsSpent))
             throw new InvalidOperationException(
                 "Недостаточно Очков Эволюции.");
 
@@ -154,12 +162,12 @@ public class OrganismProgression : MonoBehaviour
         return evolutionPoints >= amount;
     }
 
-    public bool SpendEvolutionPoints(int amount)
+    public bool ModifyEvolutionPoints(int amount)
     {
         if (!CanSpendEvolutionPoints(amount))
             return false;
 
-        evolutionPoints -= amount; // if amount is greater than 0, an addition will take place
+        evolutionPoints += amount;
         OnEvolutionPointsChanged?.Invoke();
 
         return true;

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: hardy_legs
   m_EditorClassIdentifier: Assembly-CSharp::BodyPartVariantSO
   variantId: 003002
-  displayName: "\u0412\u044B\u043D\u043E\u0441\u043B\u0438\u0432\u044B\u0435 \u043D\u043E\u0433\u0438"
+  displayName: "\u0412\u044B\u043D\u043E\u0441\u043B\u0438\u0432\u044B\u0435"
+  bodyPart: {fileID: 11400000, guid: f2c594c61e99dac4c860aab4ca3d41f8, type: 2}
   unlockLevel: 5
   description: "\u041C\u044B\u0448\u0435\u0447\u043D\u044B\u0435 \u0432\u043E\u043B\u043E\u043A\u043D\u0430
     \u043B\u0430\u043F\u043E\u043A \u043D\u0430\u0447\u0438\u043D\u0430\u044E\u0442
@@ -31,6 +32,7 @@ MonoBehaviour:
     \u043F\u0435\u0440\u0435\u043C\u0435\u0449\u0435\u043D\u0438\u0435 \u0431\u043E\u043B\u0435\u0435
     \u044D\u043A\u043E\u043D\u043E\u043C\u043D\u044B\u043C \u0438 \u0443\u0441\u0442\u043E\u0439\u0447\u0438\u0432\u044B\u043C
     \u043A \u0437\u0430\u0442\u044F\u0436\u043D\u044B\u043C \u043D\u0430\u0433\u0440\u0443\u0437\u043A\u0430\u043C."
+  priceInEvolutionPoints: 2
   overlaySprite: {fileID: 21300000, guid: a021672df9ec8174f90f871ff1234a7c, type: 3}
   modifiers:
   - stat: 19

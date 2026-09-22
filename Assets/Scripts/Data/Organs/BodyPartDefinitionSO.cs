@@ -21,7 +21,7 @@ public class BodyPartDefinitionSO : ScriptableObject
     [Header("Base modifiers")]
     public List<BodyStatModifier> modifiers = new();
 
-    [Header("Base modifiers")]
+    [Header("Mutations")]
     public List<BodyPartVariantSO> bodyPartMutations = new();
 
     public List<BodyPartVariantSO> GetVariantsForLevel(int level)

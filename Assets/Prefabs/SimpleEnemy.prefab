@@ -865,11 +865,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e140b12a75b17894fac7a33d551c6a14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrganismProgression
+  combatant: {fileID: 7376604699610478457}
+  startingEvolution: {fileID: 11400000, guid: 5cb99cacac1bae8459d92d26ec00c9c0, type: 2}
   level: 1
   experience: 0
   experienceToNextLevel: 10
-  evolutionStage: 1
-  mutationCap: 5
+  currentEvolution: {fileID: 11400000, guid: 5cb99cacac1bae8459d92d26ec00c9c0, type: 2}
+  evolutionPoints: 0
+  strengthExt: 0
+  strengthInt: 0
+  enduranceExt: 0
+  enduranceInt: 0
+  achievementFlags: []
   biomass: 0
 --- !u!114 &943026238583717204
 MonoBehaviour:

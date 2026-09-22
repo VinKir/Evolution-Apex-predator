@@ -33,6 +33,9 @@ public class MutationUIController : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private TMP_Text biomassText;
+    [SerializeField] private TMP_Text LevelText;
+    [SerializeField] private TMP_Text XPText;
+    [SerializeField] private TMP_Text EvoStageText;
     [SerializeField] private Button mutateButton;
     [SerializeField] private Button closeButton;
     [SerializeField] private Transform rowsRoot;
@@ -67,7 +70,6 @@ public class MutationUIController : MonoBehaviour
 
     private void Start()
     {
-        BuildRows();
         RefreshAll();
         if (panelRoot != null)
             panelRoot.SetActive(false);
@@ -153,15 +155,42 @@ public class MutationUIController : MonoBehaviour
 
         body.EnsureStates();
 
+        BuildRows();
+
         float pendingCost = GetTotalPendingCost();
         float remainingBiomass = progression != null ? progression.Biomass - pendingCost : 0f;
 
-        if (biomassText != null && progression != null)
+        if (progression != null)
         {
-            if (pendingCost > 0f)
-                biomassText.text = $"{progression.Biomass:0.##} <color=red>({remainingBiomass:0.##})</color>";
-            else
-                biomassText.text = $"{progression.Biomass:0.##}";
+            if (biomassText != null)
+            {
+                if (pendingCost > 0f)
+                    biomassText.text = $"{progression.Biomass:0.##} <color=red>({remainingBiomass:0.##})</color>";
+                else
+                    biomassText.text = $"{progression.Biomass:0.##}";
+            }
+            if (LevelText != null)
+            {
+                if (progression.Level >= progression.LevelCap)
+                    LevelText.text = $"Уровень <color=red>{progression.Level:0.##}/{progression.LevelCap:0.##}</color>";
+                else
+                    LevelText.text = $"Уровень {progression.Level:0.##}/{progression.LevelCap:0.##}";
+            }
+            if (XPText != null)
+            {
+                if (progression.Level >= progression.LevelCap)
+                    XPText.text = $"<color=red>{progression.Experience:0.##}/{progression.ExperienceToNextLevel:0.##}</color>";
+                else
+                    XPText.text = $"{progression.Experience:0.##}/{progression.ExperienceToNextLevel:0.##}";
+            }
+            if (EvoStageText != null)
+            {
+                if (progression.Level >= progression.LevelCap)
+                    EvoStageText.text = $"<color=green>Стадия Эволюции: {progression.EvolutionStage}</color>";
+                else
+                    EvoStageText.text = $"Стадия Эволюции: {progression.EvolutionStage}";
+            }
+            
         }
 
         foreach (var state in body.States)
