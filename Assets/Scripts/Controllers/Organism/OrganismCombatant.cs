@@ -247,6 +247,15 @@ public class OrganismCombatant : MonoBehaviour
         }
 
         Regenerate(dt);
+        
+        if (CanRegrowPart(BodyPartType.Jaws))
+            TryRegrowPart(BodyPartType.Jaws);
+
+        if (CanRegrowPart(BodyPartType.Legs))
+            TryRegrowPart(BodyPartType.Legs);
+
+        if (CanRegrowPart(BodyPartType.Chitin))
+            TryRegrowPart(BodyPartType.Chitin);
 
         if (movement != null && movement.IsSelfMoving)
         {
@@ -985,19 +994,16 @@ public class OrganismCombatant : MonoBehaviour
                 jawsDisabled = false;
                 if (graphicsJaws != null)
                     graphicsJaws.gameObject.SetActive(true);
-                lastRegrowJawsTime = Time.time;
                 break;
             case BodyPartType.Legs:
                 legsDisabled = false;
                 if (graphicsLegs != null)
                     graphicsLegs.gameObject.SetActive(true);
-                lastRegrowLegsTime = Time.time;
                 break;
             case BodyPartType.Chitin:
                 chitinDisabled = false;
                 if (graphicsChitin != null)
                     graphicsChitin.gameObject.SetActive(true);
-                lastRegrowChitinTime = Time.time;
                 break;
         }
     }
@@ -1044,24 +1050,26 @@ public class OrganismCombatant : MonoBehaviour
         {
             CurrentJawsHp = Mathf.Max(CurrentJawsHp, maxHp * percent);
             OnJawsHpChanged?.Invoke();
+
+            lastRegrowJawsTime = Time.time;
         }
         else if (part == BodyPartType.Legs)
         {
             CurrentLeftLegHp = Mathf.Max(CurrentLeftLegHp, maxHp * percent);
             CurrentRightLegHp = Mathf.Max(CurrentRightLegHp, maxHp * percent);
             OnLegsHpChanged?.Invoke();
+
+            lastRegrowLegsTime = Time.time;
         }
         else if (part == BodyPartType.Chitin)
         {
             CurrentChitinHp = Mathf.Max(CurrentChitinHp, maxHp * percent);
             OnChitinHpChanged?.Invoke();
+
+            lastRegrowChitinTime = Time.time;
         }
 
         EnablePart(part);
-
-        if (part == BodyPartType.Jaws) lastRegrowJawsTime = Time.time;
-        if (part == BodyPartType.Legs) lastRegrowLegsTime = Time.time;
-        if (part == BodyPartType.Chitin) lastRegrowChitinTime = Time.time;
 
         return true;
     }

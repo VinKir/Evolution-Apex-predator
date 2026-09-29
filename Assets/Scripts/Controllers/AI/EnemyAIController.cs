@@ -99,9 +99,6 @@ public class EnemyAIController : MonoBehaviour
     {
         context.UpdateFrom(this, memory);
 
-        // Try to regrow disabled body parts
-        brain.TryRegrowParts(context, memory);
-
         var nextState = brain.DecideState(context, memory);
         stateMachine.ChangeState(nextState);
     }
