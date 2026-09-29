@@ -40,6 +40,12 @@ public struct OrganismRuntimeStats
     public float attackWindup;
     public float attackActiveTime;
     public float attackCooldown;
+    public float experienceOnHitMult;
+    public float experienceOnHitVsLowerEvolutionMult;
+    public float experienceOnHitVsHigherEvolutionMult;
+    public float experienceOnKillMult;
+    public float experienceOnKillVsLowerEvolutionMult;
+    public float experienceOnKillVsHigherEvolutionMult;
 
     public float chitinDamageMultiplierDealt;
     public float chitinDamageMultiplierTaken;
@@ -349,6 +355,12 @@ public class OrganismCombatant : MonoBehaviour
         s.attackWindup = Mathf.Max(0f, CombatSettings.BaseAttackWindup - bonus.attackWindupReduction);
         s.attackActiveTime = Mathf.Max(0f, CombatSettings.BaseAttackActiveTime - bonus.attackActiveTimeReduction);
         s.attackCooldown = Mathf.Max(0f, CombatSettings.BaseAttackCooldown - bonus.attackCooldownReduction);
+        s.experienceOnHitMult = bonus.experienceOnHitMult;
+        s.experienceOnHitVsLowerEvolutionMult = bonus.experienceOnHitVsLowerEvolutionMult;
+        s.experienceOnHitVsHigherEvolutionMult = bonus.experienceOnHitVsHigherEvolutionMult;
+        s.experienceOnKillMult = bonus.experienceOnKillMult;
+        s.experienceOnKillVsLowerEvolutionMult = bonus.experienceOnKillVsLowerEvolutionMult;
+        s.experienceOnKillVsHigherEvolutionMult = bonus.experienceOnKillVsHigherEvolutionMult;
 
         // TODO: сделать зависимость цены на движение и атаку от какого-то параметра, чтоб из-за высокой силы какой-то стоимость атаки и движения увеличивалась, а от чего-то другого уменьшалась
         s.staminaMoveCost = Mathf.Max(0.01f, 1f * (1f - bonus.staminaMoveCostReduction));
@@ -482,6 +494,12 @@ public class OrganismCombatant : MonoBehaviour
             case BodyStatType.AttackWindupReduction: bonuses.attackWindupReduction += value; break;
             case BodyStatType.AttackActiveTimeReduction: bonuses.attackActiveTimeReduction += value; break;
             case BodyStatType.AttackCooldownReduction: bonuses.attackCooldownReduction += value; break;
+            case BodyStatType.ExperienceOnHitMult: bonuses.experienceOnHitMult += value; break;
+            case BodyStatType.ExperienceOnHitVsLowerEvolutionMult: bonuses.experienceOnHitVsLowerEvolutionMult += value; break;
+            case BodyStatType.ExperienceOnHitVsHigherEvolutionMult: bonuses.experienceOnHitVsHigherEvolutionMult += value; break;
+            case BodyStatType.ExperienceOnKillMult: bonuses.experienceOnKillMult += value; break;
+            case BodyStatType.ExperienceOnKillVsLowerEvolutionMult: bonuses.experienceOnKillVsLowerEvolutionMult += value; break;
+            case BodyStatType.ExperienceOnKillVsHigherEvolutionMult: bonuses.experienceOnKillVsHigherEvolutionMult += value; break;
         }
     }
 
@@ -774,19 +792,32 @@ public class OrganismCombatant : MonoBehaviour
         if (attacker == null || attacker.progression == null || progression == null)
             return;
 
-        int experience = killed
-            ? Mathf.Max(0, 10 * (1 + EvolutionStage - attacker.EvolutionStage))
-                + Mathf.Max(0, Level - attacker.Level)
-                + 1
-            : 1;
+        int evolutionStageDifference = EvolutionStage - attacker.EvolutionStage;
+        float experienceMultiplier = CombatSettings.BaseExperienceMultiplier;
+        if (killed)
+        {
+            experienceMultiplier += attacker.Stats.experienceOnKillMult;
+            if (evolutionStageDifference < 0)
+                experienceMultiplier += attacker.Stats.experienceOnKillVsLowerEvolutionMult;
+            else if (evolutionStageDifference > 0)
+                experienceMultiplier += attacker.Stats.experienceOnKillVsHigherEvolutionMult;
+        }
+        else
+        {
+            experienceMultiplier += attacker.Stats.experienceOnHitMult;
+            if (evolutionStageDifference < 0)
+                experienceMultiplier += attacker.Stats.experienceOnHitVsLowerEvolutionMult;
+            else if (evolutionStageDifference > 0)
+                experienceMultiplier += attacker.Stats.experienceOnHitVsHigherEvolutionMult;
+        }
 
-        attacker.progression.AddExperience(experience);
+        float baseExperience = killed
+            ? Mathf.Pow(10f, EvolutionStage) + Level
+            : CombatSettings.BaseExperiencePerHit;
+        attacker.progression.AddExperience(baseExperience * experienceMultiplier);
 
         if (!killed)
             return;
-
-        int evolutionStageDifference =
-            progression.EvolutionStage - attacker.progression.EvolutionStage;
 
         int evolutionPoints = evolutionStageDifference switch
         {

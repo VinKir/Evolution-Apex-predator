@@ -178,10 +178,11 @@ public class MutationUIController : MonoBehaviour
             }
             if (XPText != null)
             {
+                int displayedExperience = Mathf.RoundToInt(progression.Experience);
                 if (progression.Level >= progression.LevelCap)
-                    XPText.text = $"<color=red>{progression.Experience:0.##}/{progression.ExperienceToNextLevel:0.##}</color>";
+                    XPText.text = $"<color=red>{displayedExperience}/{progression.ExperienceToNextLevel}</color>";
                 else
-                    XPText.text = $"{progression.Experience:0.##}/{progression.ExperienceToNextLevel:0.##}";
+                    XPText.text = $"{displayedExperience}/{progression.ExperienceToNextLevel}";
             }
             if (EvoStageText != null)
             {

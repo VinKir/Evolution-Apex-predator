@@ -12,7 +12,7 @@ public class OrganismProgression : MonoBehaviour
 
     [Header("Level")]
     [SerializeField] private int level = 1;
-    [SerializeField] private int experience = 0;
+    [SerializeField] private float experience = 0f;
     [SerializeField] private int experienceToNextLevel = 10;
 
     [Header("Evolution")]
@@ -42,7 +42,7 @@ public class OrganismProgression : MonoBehaviour
     public int EnduranceInt => enduranceInt;
 
     public int Level => level;
-    public int Experience => experience;
+    public float Experience => experience;
     public int ExperienceToNextLevel => experienceToNextLevel;
 
     public EvolutionSO CurrentEvolution => currentEvolution;
@@ -84,7 +84,7 @@ public class OrganismProgression : MonoBehaviour
         enduranceInt = initialEvolution.enduranceIntBonus;
     }
 
-    public void AddExperience(int amount)
+    public void AddExperience(float amount)
     {
         if (amount <= 0)
             return;
@@ -104,7 +104,7 @@ public class OrganismProgression : MonoBehaviour
             if (level >= LevelCap)
             {
                 level = LevelCap;
-                experience = 0;
+                experience = 0f;
                 break;
             }
         }

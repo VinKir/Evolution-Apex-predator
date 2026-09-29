@@ -13,6 +13,8 @@ public static class CombatSettings
     public const float BaseAttackWindup = 1f; // in seconds
     public const float BaseAttackActiveTime = 1f; // in seconds
     public const float BaseAttackCooldown = 5f; // in seconds
+    public const float BaseExperiencePerHit = 1f;
+    public const float BaseExperienceMultiplier = 1f;
 }
 
 public enum BodyPartType
@@ -89,7 +91,13 @@ public enum BodyStatType
     AccidentalDeathChance,
     AttackWindupReduction,
     AttackActiveTimeReduction,
-    AttackCooldownReduction
+    AttackCooldownReduction,
+    ExperienceOnHitMult,
+    ExperienceOnHitVsLowerEvolutionMult,
+    ExperienceOnHitVsHigherEvolutionMult,
+    ExperienceOnKillMult,
+    ExperienceOnKillVsLowerEvolutionMult,
+    ExperienceOnKillVsHigherEvolutionMult
 }
 
 [Serializable]
@@ -156,4 +164,10 @@ public struct CombatBonusAccumulator
     public float attackWindupReduction;
     public float attackActiveTimeReduction;
     public float attackCooldownReduction;
+    public float experienceOnHitMult;
+    public float experienceOnHitVsLowerEvolutionMult;
+    public float experienceOnHitVsHigherEvolutionMult;
+    public float experienceOnKillMult;
+    public float experienceOnKillVsLowerEvolutionMult;
+    public float experienceOnKillVsHigherEvolutionMult;
 }
