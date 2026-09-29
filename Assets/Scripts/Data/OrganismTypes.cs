@@ -10,6 +10,9 @@ public static class CombatSettings
     public const float BaseRegenPeriod = 3f; // in seconds
     public const float MinRegenPeriod = 0.5f; // in seconds
     public const float AccidentalDeathCheckInterval = 60f; // in seconds
+    public const float BaseAttackWindup = 1f; // in seconds
+    public const float BaseAttackActiveTime = 1f; // in seconds
+    public const float BaseAttackCooldown = 5f; // in seconds
 }
 
 public enum BodyPartType
@@ -83,7 +86,10 @@ public enum BodyStatType
     ChitinRegrowCooldownReduction,
     MaxStaminaMult,
     StaminaRecoveryMult,
-    AccidentalDeathChance
+    AccidentalDeathChance,
+    AttackWindupReduction,
+    AttackActiveTimeReduction,
+    AttackCooldownReduction
 }
 
 [Serializable]
@@ -147,4 +153,7 @@ public struct CombatBonusAccumulator
     public float maxStaminaMult;
     public float staminaRecoveryMult;
     public float accidentalDeathChance;
+    public float attackWindupReduction;
+    public float attackActiveTimeReduction;
+    public float attackCooldownReduction;
 }

@@ -37,6 +37,9 @@ public struct OrganismRuntimeStats
     public float attackDamage;
     public float staminaMoveCost;
     public float staminaAttackCost;
+    public float attackWindup;
+    public float attackActiveTime;
+    public float attackCooldown;
 
     public float chitinDamageMultiplierDealt;
     public float chitinDamageMultiplierTaken;
@@ -104,11 +107,6 @@ public class OrganismCombatant : MonoBehaviour
     [SerializeField] private SpriteRenderer chitinCracks;
     [SerializeField] private SpriteRenderer chitinBroken;
 
-    [Header("Attack")]
-    [SerializeField] private float attackWindup = 0.12f;
-    [SerializeField] private float attackActiveTime = 0.18f;
-    [SerializeField] private float attackCooldown = 0.55f;
-
     [Header("Death Drop")]
     [SerializeField] private float corpseBiomassMultiplier = 1f;
 
@@ -147,7 +145,7 @@ public class OrganismCombatant : MonoBehaviour
     private Transform graphicsChitin;
     private Transform graphicsJaws;
     private Transform graphicsLegs;
-
+    
     private bool chitinDisabled = false;
     private bool jawsDisabled = false;
     private bool legsDisabled = false;
@@ -348,6 +346,9 @@ public class OrganismCombatant : MonoBehaviour
         s.staminaRegen = (0.2f + progression.StrengthInt + progression.EnduranceInt) * (1 + bonus.staminaRecoveryMult);
 
         s.attackDamage = progression.StrengthExt * (1f + bonus.attackDamageMult);
+        s.attackWindup = Mathf.Max(0f, CombatSettings.BaseAttackWindup - bonus.attackWindupReduction);
+        s.attackActiveTime = Mathf.Max(0f, CombatSettings.BaseAttackActiveTime - bonus.attackActiveTimeReduction);
+        s.attackCooldown = Mathf.Max(0f, CombatSettings.BaseAttackCooldown - bonus.attackCooldownReduction);
 
         // TODO: сделать зависимость цены на движение и атаку от какого-то параметра, чтоб из-за высокой силы какой-то стоимость атаки и движения увеличивалась, а от чего-то другого уменьшалась
         s.staminaMoveCost = Mathf.Max(0.01f, 1f * (1f - bonus.staminaMoveCostReduction));
@@ -478,6 +479,9 @@ public class OrganismCombatant : MonoBehaviour
             case BodyStatType.MaxStaminaMult: bonuses.maxStaminaMult += value; break;
             case BodyStatType.StaminaRecoveryMult: bonuses.staminaRecoveryMult += value; break;
             case BodyStatType.AccidentalDeathChance: bonuses.accidentalDeathChance += value; break;
+            case BodyStatType.AttackWindupReduction: bonuses.attackWindupReduction += value; break;
+            case BodyStatType.AttackActiveTimeReduction: bonuses.attackActiveTimeReduction += value; break;
+            case BodyStatType.AttackCooldownReduction: bonuses.attackCooldownReduction += value; break;
         }
     }
 
@@ -620,8 +624,12 @@ public class OrganismCombatant : MonoBehaviour
 
     private IEnumerator AttackRoutine()
     {
+        float windup = Stats.attackWindup;
+        float activeTime = Stats.attackActiveTime;
+        float cooldown = Stats.attackCooldown;
+
         attackBusy = true;
-        nextAttackTime = Time.time + attackCooldown;
+        nextAttackTime = Time.time + cooldown;
 
         if (animator != null)
             animator.SetTrigger("Attack");
@@ -629,12 +637,12 @@ public class OrganismCombatant : MonoBehaviour
         if (attackHitbox != null)
             attackHitbox.SetActiveSwing(false);
 
-        yield return new WaitForSeconds(attackWindup);
+        yield return new WaitForSeconds(windup);
 
         if (attackHitbox != null)
             attackHitbox.SetActiveSwing(true);
 
-        yield return new WaitForSeconds(attackActiveTime);
+        yield return new WaitForSeconds(activeTime);
 
         if (attackHitbox != null)
             attackHitbox.SetActiveSwing(false);
