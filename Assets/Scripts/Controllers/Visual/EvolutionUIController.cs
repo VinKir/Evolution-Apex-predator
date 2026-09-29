@@ -98,6 +98,11 @@ public class EvolutionUIController : MonoBehaviour
         strengthIntRow?.Initialize(this);
         enduranceExtRow?.Initialize(this);
         enduranceIntRow?.Initialize(this);
+
+        if (evolutionPanel != null)
+            evolutionPanel.SetActive(false);
+        if (purchasesPanel != null)
+            purchasesPanel.SetActive(false);
     }
 
     private void Update()
