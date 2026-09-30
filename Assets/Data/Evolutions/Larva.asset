@@ -31,7 +31,8 @@ MonoBehaviour:
   enduranceExtBonus: 5
   enduranceIntBonus: 5
   mutations: []
-  organs: []
+  organs:
+  - {fileID: 11400000, guid: 5dba4ed8dd59baf498d8ed13a9165af9, type: 2}
   purchasableOrgans:
   - {fileID: 11400000, guid: f5c144b7e2daa3b44874a4d22ce8cc78, type: 2}
   nextEvolutions: []

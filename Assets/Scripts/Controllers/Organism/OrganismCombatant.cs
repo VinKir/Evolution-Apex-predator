@@ -145,6 +145,8 @@ public class OrganismCombatant : MonoBehaviour
 
     private bool attackBusy;
     private float nextAttackTime;
+    private float animatorSpeedBeforeAttack = 1f;
+    private bool attackAnimatorSpeedAdjusted;
     private readonly List<Coroutine> runningCoroutines = new();
     private bool statsInitialized = false;
 
@@ -225,6 +227,7 @@ public class OrganismCombatant : MonoBehaviour
 
     private void OnDisable()
     {
+        RestoreAnimatorSpeed();
         UnhookSources();
         OnChitinHpChanged -= UpdateChitinVisuals;
         OrganismCombatantRegistry.Instance?.Unregister(this);
@@ -644,13 +647,19 @@ public class OrganismCombatant : MonoBehaviour
     {
         float windup = Stats.attackWindup;
         float activeTime = Stats.attackActiveTime;
-        float cooldown = Stats.attackCooldown;
-
         attackBusy = true;
-        nextAttackTime = Time.time + cooldown;
+        nextAttackTime = Time.time + Stats.attackCooldown;
 
         if (animator != null)
+        {
+            animatorSpeedBeforeAttack = animator.speed;
+            float baseDuration = CombatSettings.BaseAttackWindup + CombatSettings.BaseAttackActiveTime;
+            float attackDuration = windup + activeTime;
+            float speedMultiplier = attackDuration > 0f ? baseDuration / attackDuration : 1f;
+            animator.speed = animatorSpeedBeforeAttack * speedMultiplier;
+            attackAnimatorSpeedAdjusted = true;
             animator.SetTrigger("Attack");
+        }
 
         if (attackHitbox != null)
             attackHitbox.SetActiveSwing(false);
@@ -665,7 +674,19 @@ public class OrganismCombatant : MonoBehaviour
         if (attackHitbox != null)
             attackHitbox.SetActiveSwing(false);
 
+        RestoreAnimatorSpeed();
         attackBusy = false;
+    }
+
+    private void RestoreAnimatorSpeed()
+    {
+        if (!attackAnimatorSpeedAdjusted)
+            return;
+
+        if (animator != null)
+            animator.speed = animatorSpeedBeforeAttack;
+
+        attackAnimatorSpeedAdjusted = false;
     }
 
     public AttackPacket BuildAttackPacket()
