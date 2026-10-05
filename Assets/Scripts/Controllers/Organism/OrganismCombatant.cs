@@ -318,6 +318,7 @@ public class OrganismCombatant : MonoBehaviour
         float oldStaminaRatio = Stats.maxStamina > 0.001f ? CurrentStamina / Stats.maxStamina : 1f;
 
         Stats = BuildStats();
+        transform.localScale = new Vector3(Stats.sizeMultiplier, Stats.sizeMultiplier, transform.localScale.z);
 
         CurrentChitinHp = Mathf.Clamp(Stats.maxChitinHp * oldChitinRatio, 0f, Stats.maxChitinHp);
         CurrentBodyHp = Mathf.Clamp(Stats.maxBodyHp * oldBodyRatio, 0f, Stats.maxBodyHp);
@@ -1050,6 +1051,11 @@ public class OrganismCombatant : MonoBehaviour
         {
             float biomass = EstimateCorpseBiomass();
             var corpse = Instantiate(corpsePrefab, transform.position, Quaternion.identity);
+            Vector3 corpseScale = corpse.transform.localScale;
+            corpse.transform.localScale = new Vector3(
+                corpseScale.x * Stats.sizeMultiplier,
+                corpseScale.y * Stats.sizeMultiplier,
+                corpseScale.z);
             corpse.InitializeRuntime(biomass, 10f);
         }
 

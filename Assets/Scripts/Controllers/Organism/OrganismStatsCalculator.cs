@@ -39,48 +39,46 @@ public static class OrganismStatsCalculator
 
             turnSpeed = 6f * (1f + bonus.turnSpeedMult) * Mathf.Clamp(1f - progression.StrengthExt * 0.03f, 0.4f, 2f),
 
-            sizeMultiplier = (progression.StrengthExt * 0.08f - progression.StrengthInt * 0.03f) * (1f + bonus.sizeMult)
+            sizeMultiplier = (progression.StrengthExt * 0.08f - progression.StrengthInt * 0.03f) * (1f + bonus.sizeMult),
+            chitinDamageMultiplierDealt = bonus.chitinDamageMultiplierDealt,
+            chitinDamageMultiplierTaken = bonus.chitinDamageMultiplierTaken,
+            internalDamageMultiplierDealt = bonus.internalDamageMultiplierDealt,
+            internalDamageMultiplierTaken = bonus.internalDamageMultiplierTaken,
+            bodyDamageMultiplierDealt = bonus.bodyDamageMultiplierDealt,
+            bodyDamageMultiplierTaken = bonus.bodyDamageMultiplierTaken,
+            limbDamageMultiplierDealt = bonus.limbDamageMultiplierDealt,
+            limbDamageMultiplierTaken = bonus.limbDamageMultiplierTaken,
+            legsDamageMultiplierDealt = bonus.legsDamageMultiplierDealt,
+            legsDamageMultiplierTaken = bonus.legsDamageMultiplierTaken,
+            jawsDamageMultiplierDealt = bonus.jawsDamageMultiplierDealt,
+            jawsDamageMultiplierTaken = bonus.jawsDamageMultiplierTaken,
+            chitinReflectPercent = bonus.chitinReflectPercent,
+            bodyRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.bodyRegenPeriodReduction),
+            bodyRegenPercent = bonus.bodyRegenPercent,
+            chitinRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.chitinRegenPeriodReduction),
+            chitinRegenPercent = bonus.chitinRegenPercent,
+            jawsRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.jawsRegenPeriodReduction),
+            jawsRegenPercent = bonus.jawsRegenPercent,
+            legsRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.legsRegenPeriodReduction),
+            legsRegenPercent = bonus.legsRegenPercent,
+
+            attackVsHealthyMult = 1f + Mathf.Max(0f, bonus.attackVsHealthyMult),
+            attackVsLowMult = 1f + Mathf.Max(0f, bonus.attackVsLowMult),
+            bleedPercent = bonus.bleedPercent,
+            lifestealPercent = bonus.lifestealPercent,
+            bleedDurationSeconds = bonus.bleedDurationSeconds,
+            jawsRegrowPercent = bonus.jawsRegrowPercent,
+            legsRegrowPercent = bonus.legsRegrowPercent,
+            chitinRegrowPercent = bonus.chitinRegrowPercent,
+
+            jawsRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.jawsRegrowCooldownReduction),
+            legsRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.legsRegrowCooldownReduction),
+            chitinRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.chitinRegrowCooldownReduction),
+
+            accidentalDeathChance = bonus.accidentalDeathChance
         };
+        
         stats.detectionRadius = CombatSettings.BaseDetectionRadius * stats.sizeMultiplier * Mathf.Clamp01(1f - bonus.detectRadiusReduction);
-        Debug.Log(stats.detectionRadius);
-        Debug.Log(bonus.detectRadiusReduction);
-        stats.chitinDamageMultiplierDealt = bonus.chitinDamageMultiplierDealt;
-        stats.chitinDamageMultiplierTaken = bonus.chitinDamageMultiplierTaken;
-        stats.internalDamageMultiplierDealt = bonus.internalDamageMultiplierDealt;
-        stats.internalDamageMultiplierTaken = bonus.internalDamageMultiplierTaken;
-        stats.bodyDamageMultiplierDealt = bonus.bodyDamageMultiplierDealt;
-        stats.bodyDamageMultiplierTaken = bonus.bodyDamageMultiplierTaken;
-        stats.limbDamageMultiplierDealt = bonus.limbDamageMultiplierDealt;
-        stats.limbDamageMultiplierTaken = bonus.limbDamageMultiplierTaken;
-        stats.legsDamageMultiplierDealt = bonus.legsDamageMultiplierDealt;
-        stats.legsDamageMultiplierTaken = bonus.legsDamageMultiplierTaken;
-        stats.jawsDamageMultiplierDealt = bonus.jawsDamageMultiplierDealt;
-        stats.jawsDamageMultiplierTaken = bonus.jawsDamageMultiplierTaken;
-        stats.chitinReflectPercent = bonus.chitinReflectPercent;
-
-        stats.bodyRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.bodyRegenPeriodReduction);
-        stats.bodyRegenPercent = bonus.bodyRegenPercent;
-        stats.chitinRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.chitinRegenPeriodReduction);
-        stats.chitinRegenPercent = bonus.chitinRegenPercent;
-        stats.jawsRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.jawsRegenPeriodReduction);
-        stats.jawsRegenPercent = bonus.jawsRegenPercent;
-        stats.legsRegenPeriod = Mathf.Max(CombatSettings.MinRegenPeriod, CombatSettings.BaseRegenPeriod - bonus.legsRegenPeriodReduction);
-        stats.legsRegenPercent = bonus.legsRegenPercent;
-
-        stats.attackVsHealthyMult = 1f + Mathf.Max(0f, bonus.attackVsHealthyMult);
-        stats.attackVsLowMult = 1f + Mathf.Max(0f, bonus.attackVsLowMult);
-        stats.bleedPercent = bonus.bleedPercent;
-        stats.lifestealPercent = bonus.lifestealPercent;
-        stats.bleedDurationSeconds = bonus.bleedDurationSeconds;
-        stats.jawsRegrowPercent = bonus.jawsRegrowPercent;
-        stats.legsRegrowPercent = bonus.legsRegrowPercent;
-        stats.chitinRegrowPercent = bonus.chitinRegrowPercent;
-
-        stats.jawsRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.jawsRegrowCooldownReduction);
-        stats.legsRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.legsRegrowCooldownReduction);
-        stats.chitinRegrowCooldown = Mathf.Max(CombatSettings.MinRegrowCooldown, CombatSettings.BaseRegrowCooldown - bonus.chitinRegrowCooldownReduction);
-
-        stats.accidentalDeathChance = bonus.accidentalDeathChance;
 
         return stats;
     }

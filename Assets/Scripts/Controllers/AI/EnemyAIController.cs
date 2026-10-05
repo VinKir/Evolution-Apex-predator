@@ -9,8 +9,8 @@ public class EnemyAIController : MonoBehaviour
 
     [Header("Brain")]
     [SerializeField] private float thinkInterval = 0.25f;
-    [SerializeField] private float attackRange = 1.1f;
-    [SerializeField] private float corpseEatRange = 1.0f;
+    [SerializeField] private float attackRange = 2.4f;
+    [SerializeField] private float corpseEatRange = 2.4f;
 
     [Header("Movement")]
     [SerializeField] private float wanderChangeInterval = 2.5f;
@@ -21,8 +21,8 @@ public class EnemyAIController : MonoBehaviour
     public OrganismCombatant Combatant => combatant;
     public OrganismMovementMotor Movement => movement;
     public OrganismBehaviourType BehaviourType => behaviourType;
-    public float AttackRange => attackRange;
-    public float EatRange => corpseEatRange;
+    public float AttackRange => attackRange * (combatant != null ? combatant.Stats.sizeMultiplier : 1f);
+    public float EatRange => corpseEatRange * (combatant != null ? combatant.Stats.sizeMultiplier : 1f);
     public float WanderChangeInterval => wanderChangeInterval;
     public float TargetReachThreshold => targetReachThreshold;
 
