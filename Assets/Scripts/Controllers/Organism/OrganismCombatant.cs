@@ -351,11 +351,6 @@ public class OrganismCombatant : MonoBehaviour
         return OrganismStatsCalculator.Calculate(progression, states, EvolutionStage);
     }
 
-    private float RandomInRange(float min, float max)
-    {
-        return UnityEngine.Random.Range(min, max);
-    }
-
     private void UpdateChitinVisuals()
     {
         if (chitinCracks == null && chitinBroken == null)

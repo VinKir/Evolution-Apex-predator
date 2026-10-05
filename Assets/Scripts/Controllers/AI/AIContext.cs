@@ -98,8 +98,7 @@ public class AIContext
             IsHome = true;
         }
 
-        // TODO: переделать детекцию. Замечать должен не ты, а тебя. Радиус детекции показывает на каком расстоянии боты заметят данное существо. Потому что в данный радиус детекции показывает на каком радиусе данное существо замечает других существ
-        var colliders = Physics2D.OverlapCircleAll(CurrentPosition, Combatant.Stats.detectionRadius);
+        var colliders = Physics2D.OverlapCircleAll(CurrentPosition, CombatSettings.BaseDetectionRadius);
 
         foreach (var collider in colliders)
         {
@@ -109,10 +108,14 @@ public class AIContext
             var organism = collider.GetComponentInParent<OrganismCombatant>();
             if (organism != null && organism != Combatant)
             {
-                if (Combatant.IsFriendlyTo(organism))
-                    VisibleAllies.Add(organism);
-                else
-                    VisibleEnemies.Add(organism);
+                float distance = Vector2.Distance(CurrentPosition, organism.transform.position);
+                if (distance <= organism.Stats.detectionRadius)
+                {
+                    if (Combatant.IsFriendlyTo(organism))
+                        VisibleAllies.Add(organism);
+                    else
+                        VisibleEnemies.Add(organism);
+                }
             }
 
             var food = collider.GetComponent<FoodItem>();

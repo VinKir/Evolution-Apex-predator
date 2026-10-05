@@ -35,6 +35,6 @@ MonoBehaviour:
   overlaySprite: {fileID: 21300000, guid: 724ddde0757f9434096347dd2b47178f, type: 3}
   modifiers:
   - stat: 25
-    value: 0.1
+    value: 0.5
     perLevel: 0.005
     perEvolutionStage: 0.1

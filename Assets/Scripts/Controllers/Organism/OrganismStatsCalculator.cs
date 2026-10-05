@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
 public static class OrganismStatsCalculator
@@ -40,8 +41,9 @@ public static class OrganismStatsCalculator
 
             sizeMultiplier = (progression.StrengthExt * 0.08f - progression.StrengthInt * 0.03f) * (1f + bonus.sizeMult)
         };
-        stats.detectionRadius = 4.5f * stats.sizeMultiplier * (1f - bonus.detectRadiusReduction);
-
+        stats.detectionRadius = CombatSettings.BaseDetectionRadius * stats.sizeMultiplier * Mathf.Clamp01(1f - bonus.detectRadiusReduction);
+        Debug.Log(stats.detectionRadius);
+        Debug.Log(bonus.detectRadiusReduction);
         stats.chitinDamageMultiplierDealt = bonus.chitinDamageMultiplierDealt;
         stats.chitinDamageMultiplierTaken = bonus.chitinDamageMultiplierTaken;
         stats.internalDamageMultiplierDealt = bonus.internalDamageMultiplierDealt;

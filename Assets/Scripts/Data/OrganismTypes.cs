@@ -2,6 +2,7 @@ using System;
 
 public static class CombatSettings
 {
+    public const float BaseDetectionRadius = 12f;
     public const float BaseChitinDamageMultiplier = 0.5f; // percent 0.5 - 50%
     public const float BaseInternalDamageMultiplier = 0.3f; // percent 0.3 - 30%
     public const float BleedingTickInterval = 1f; // in seconds
