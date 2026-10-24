@@ -88,3 +88,6 @@ crashlytics-build.properties
 .Trashes
 ehthumbs.db
 Thumbs.db
+# Claude Code personal settings
+.claude/settings.local.json
+.claude/docs/tmp/
