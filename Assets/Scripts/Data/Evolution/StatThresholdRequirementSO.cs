@@ -18,7 +18,7 @@ public class StatThresholdRequirementSO : EvolutionRequirementSO
 
     public override bool IsMet(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         if (progression == null || progression.Combatant == null)
             return false;
@@ -37,7 +37,7 @@ public class StatThresholdRequirementSO : EvolutionRequirementSO
 
     public override string GetDescription(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         return $"{stat} >= {minimumValue:0.##}";
     }

@@ -6,7 +6,7 @@ public static class OrganismStatsCalculator
 {
     public static OrganismRuntimeStats Calculate(
         OrganismProgression progression,
-        IReadOnlyList<PlayerBody.BodyPartRuntimeState> bodyParts,
+        IReadOnlyList<OrganismBody.BodyPartRuntimeState> bodyParts,
         int evolutionStage)
     {
         CombatBonusAccumulator bonus = AggregateBonuses(bodyParts, evolutionStage);
@@ -83,7 +83,7 @@ public static class OrganismStatsCalculator
         return stats;
     }
 
-    private static CombatBonusAccumulator AggregateBonuses(IReadOnlyList<PlayerBody.BodyPartRuntimeState> bodyParts, int evolutionStage)
+    private static CombatBonusAccumulator AggregateBonuses(IReadOnlyList<OrganismBody.BodyPartRuntimeState> bodyParts, int evolutionStage)
     {
         CombatBonusAccumulator bonuses = default;
 

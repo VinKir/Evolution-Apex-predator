@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class PlayerBody : MonoBehaviour
+public class OrganismBody : MonoBehaviour
 {
     [Serializable]
     public class AppliedVariant
@@ -108,6 +108,27 @@ public class PlayerBody : MonoBehaviour
         partDefinitions.Add(organ);
 
         EnsureStates();
+
+        OnBodyChanged?.Invoke();
+    }
+
+    // Replaces all organs at once, e.g. with a generated enemy body
+    public void ReplaceParts(List<BodyPartRuntimeState> parts)
+    {
+        partDefinitions = new List<BodyPartDefinitionSO>();
+        states = new List<BodyPartRuntimeState>();
+
+        if (parts != null)
+        {
+            foreach (var part in parts)
+            {
+                if (part == null || part.organ == null)
+                    continue;
+
+                partDefinitions.Add(part.organ);
+                states.Add(part);
+            }
+        }
 
         OnBodyChanged?.Invoke();
     }

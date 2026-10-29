@@ -29,6 +29,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f5c144b7e2daa3b44874a4d22ce8cc78, type: 2}
   purchasableOrgans: []
   nextEvolutions: []
+  previousEvolutions:
+  - {fileID: 11400000, guid: 5cb99cacac1bae8459d92d26ec00c9c0, type: 2}
   requirements:
   - {fileID: 11400000, guid: 6a92484c3e647fe468d900612d2395d7, type: 2}
   evolutionDuration: 20

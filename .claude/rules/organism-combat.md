@@ -25,6 +25,6 @@ The player and enemies share the same components on one GameObject:
 **To add a stat**, change four places: the `BodyStatType` enum (append at the end), a `CombatBonusAccumulator` field, a `case` in `AddModifier`, and an `OrganismRuntimeStats` field plus its formula in `Calculate`. If combat uses the stat, also update `AttackPacket` and `BuildAttackPacket`.
 
 ## Body parts
-- `PlayerBody` holds `BodyPartRuntimeState`s (organ, level, applied variants keyed by milestone level) and raises `OnBodyChanged`, which triggers a stat recalculation.
-- Enemies have no `PlayerBody`; their parts come from `EnemyTemplateSO.bodyParts`, and `OrganismCombatant.BuildStats` branches on `isPlayer`. The plan (see the TODOs) is to rename `PlayerBody` to `OrganismBody` and use it for every organism.
+- `OrganismBody` holds `BodyPartRuntimeState`s (organ, level, applied variants keyed by milestone level) and raises `OnBodyChanged`, which triggers a stat recalculation.
+- Every organism, player or enemy, takes its organs and mutations only from its own `OrganismBody` component. `OrganismCombatant.body` falls back to `GetComponent`. An organism without one has no organs.
 - `partId` identifies an organ. `BodyPartDefinitionSO.OnValidate` sets the back-reference on its variants automatically.

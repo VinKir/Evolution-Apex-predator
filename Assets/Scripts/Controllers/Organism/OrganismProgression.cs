@@ -7,9 +7,6 @@ public class OrganismProgression : MonoBehaviour
     [Header("References")]
     [SerializeField] private OrganismCombatant combatant;
 
-    [Header("Starting Evolution")]
-    [SerializeField] private EvolutionSO startingEvolution;
-
     [Header("Level")]
     [SerializeField] private int level = 1;
     [SerializeField] private float experience = 0f;
@@ -51,7 +48,7 @@ public class OrganismProgression : MonoBehaviour
 
     public int MutationCap => LevelCap;
 
-    public int LevelCap => (EvolutionStage + 1) * 5;
+    public int LevelCap => currentEvolution != null ? currentEvolution.LevelCap : 5;
 
     public bool CanEvolve => level >= LevelCap;
 
@@ -61,27 +58,25 @@ public class OrganismProgression : MonoBehaviour
 
     public OrganismCombatant Combatant => combatant;
 
-    private void Awake()
-    {
-        strengthExt = startingEvolution.strengthExtBonus;
-        strengthInt = startingEvolution.strengthIntBonus;
-        enduranceExt = startingEvolution.enduranceExtBonus;
-        enduranceInt = startingEvolution.enduranceIntBonus;
-    }
-
-    //TODO: доделать генерацию врага. Характеристики сейчас берутся только у базовой эволюции, должны браться сумма за все эволюции
-    public void InitializeRuntime(int initialLevel, EvolutionSO initialEvolution)
+    // Used only by generated enemies. The player and bosses are configured in the inspector
+    public void InitializeRuntime(
+        int initialLevel,
+        EvolutionSO initialEvolution,
+        int initialStrengthExt,
+        int initialStrengthInt,
+        int initialEnduranceExt,
+        int initialEnduranceInt)
     {
         currentEvolution = initialEvolution;
-        level = Mathf.Clamp(initialLevel, 1, (EvolutionStage + 1) * 5);
+        level = Mathf.Clamp(initialLevel, 1, LevelCap);
 
         experience = 0;
         experienceToNextLevel = 10 * level;
 
-        strengthExt = initialEvolution.strengthExtBonus;
-        strengthInt = initialEvolution.strengthIntBonus;
-        enduranceExt = initialEvolution.enduranceExtBonus;
-        enduranceInt = initialEvolution.enduranceIntBonus;
+        strengthExt = initialStrengthExt;
+        strengthInt = initialStrengthInt;
+        enduranceExt = initialEnduranceExt;
+        enduranceInt = initialEnduranceInt;
     }
 
     public void AddExperience(float amount)

@@ -7,7 +7,7 @@ public class AllBodyPartsMaxedRequirementSO : EvolutionRequirementSO
 {
     public override bool IsMet(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         if (body == null || progression == null)
             return false;
@@ -28,7 +28,7 @@ public class AllBodyPartsMaxedRequirementSO : EvolutionRequirementSO
 
     public override string GetDescription(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         return "Все части тела прокачаны до максимального уровня";
     }

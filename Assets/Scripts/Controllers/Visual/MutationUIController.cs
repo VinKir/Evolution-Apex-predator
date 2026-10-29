@@ -18,7 +18,7 @@ public class MutationUIController : MonoBehaviour
     [Header("Core")]
     [SerializeField] private OrganismProgression progression;
     [SerializeField] private OrganismCombatant playerCombatant;
-    [SerializeField] private PlayerBody body;
+    [SerializeField] private OrganismBody body;
     [SerializeField] private PlayerActionLock actionLock;
     [SerializeField] private PlayerMovementController movement;
 

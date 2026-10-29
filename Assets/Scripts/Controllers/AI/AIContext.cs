@@ -7,7 +7,9 @@ public class AIContext
     public Transform OwnerTransform { get; set; }
     public OrganismCombatant Combatant { get; set; }
     public OrganismMovementMotor Movement { get; set; }
-    public EnemySpawnPoint HomePoint { get; set; }
+    public bool HasHome { get; set; }
+    public Vector2 HomePosition { get; set; }
+    public bool ForceReturnHome { get; set; }
     public OrganismBehaviourType BehaviourType { get; set; }
 
     public Vector2 CurrentPosition { get; set; }
@@ -69,7 +71,9 @@ public class AIContext
         OwnerTransform = owner.transform;
         Combatant = owner.Combatant;
         Movement = owner.Movement;
-        HomePoint = owner.BasePoint;
+        HasHome = owner.HasHome;
+        HomePosition = owner.HomePosition;
+        ForceReturnHome = owner.ForceReturnHome;
         BehaviourType = owner.BehaviourType;
 
         if (Combatant == null)
@@ -85,11 +89,11 @@ public class AIContext
 
         AttackRange = owner.AttackRange;
         EatRange = owner.EatRange;
-        HomeRadius = HomePoint != null ? HomePoint.activationRadius * 0.35f : 0.25f;
+        HomeRadius = HasHome ? owner.HomeRadius : 0.25f;
 
-        if (HomePoint != null)
+        if (HasHome)
         {
-            DistanceToHome = Vector2.Distance(CurrentPosition, HomePoint.transform.position);
+            DistanceToHome = Vector2.Distance(CurrentPosition, HomePosition);
             IsHome = DistanceToHome <= HomeRadius;
         }
         else

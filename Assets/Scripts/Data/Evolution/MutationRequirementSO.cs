@@ -10,7 +10,7 @@ public class MutationRequirementSO : EvolutionRequirementSO
 
     public override bool IsMet(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         if (body == null || requiredMutation == null)
             return false;
@@ -22,7 +22,7 @@ public class MutationRequirementSO : EvolutionRequirementSO
 
     public override string GetDescription(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         return $"Мутация: {requiredMutation.displayName}";
     }

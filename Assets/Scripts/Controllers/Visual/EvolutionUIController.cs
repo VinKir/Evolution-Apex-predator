@@ -21,7 +21,7 @@ public class EvolutionUIController : MonoBehaviour
     [Header("Core")]
     [SerializeField] private OrganismProgression progression;
     [SerializeField] private OrganismCombatant combatant;
-    [SerializeField] private PlayerBody body;
+    [SerializeField] private OrganismBody body;
     [SerializeField] private PlayerActionLock actionLock;
     [SerializeField] private PlayerMovementController movement;
 

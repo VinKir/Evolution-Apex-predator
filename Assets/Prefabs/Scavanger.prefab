@@ -402,6 +402,7 @@ GameObject:
   - component: {fileID: -6186242548330578776}
   - component: {fileID: 3372105923469644836}
   - component: {fileID: 4764768291028013916}
+  - component: {fileID: 5485869602359876608}
   m_Layer: 0
   m_Name: Scavanger
   m_TagString: Untagged
@@ -466,11 +467,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 795abc3926092fd43be9e867bff2523d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrganismCombatant
-  isPlayer: 0
   factionGroupId: 1
   progression: {fileID: -6186242548330578776}
-  playerBody: {fileID: 0}
-  enemyTemplate: {fileID: 11400000, guid: 62fd75420fde6451283edbbfa8124416, type: 2}
+  body: {fileID: 5485869602359876608}
   rb: {fileID: 7488836203651898513}
   animator: {fileID: 119191974243092597}
   movement: {fileID: 4764768291028013916}
@@ -480,10 +479,8 @@ MonoBehaviour:
   statusBarAnchor: {fileID: 4519514372394771506}
   chitinCracks: {fileID: 6927799345684689516}
   chitinBroken: {fileID: 3334777882510026135}
-  attackWindup: 0.12
-  attackActiveTime: 0.18
-  attackCooldown: 0.55
   corpseBiomassMultiplier: 1
+  corpseConsumeDuration: 10
 --- !u!114 &-6186242548330578776
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -497,7 +494,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrganismProgression
   combatant: {fileID: 7372578740937500508}
-  startingEvolution: {fileID: 11400000, guid: 5cb99cacac1bae8459d92d26ec00c9c0, type: 2}
   level: 1
   experience: 0
   experienceToNextLevel: 10
@@ -549,6 +545,20 @@ MonoBehaviour:
   turnSlowdownAngle: 45
   turnSlowdownMultiplier: 0.1
   lowStaminaSpeedMultiplier: 0.5
+--- !u!114 &5485869602359876608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4564201925503750349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79b906f1d908f114f8b702013616193b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrganismBody
+  partDefinitions: []
+  states: []
 --- !u!1 &4631175123235489316
 GameObject:
   m_ObjectHideFlags: 0

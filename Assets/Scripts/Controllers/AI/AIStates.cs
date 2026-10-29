@@ -158,18 +158,18 @@ public class PatrolState : AIState
 
     public override void Enter()
     {
-        patrolPoint = Context.HomePoint != null ? Context.HomePoint.transform.position : Owner.transform.position;
+        patrolPoint = Context.HasHome ? Context.HomePosition : (Vector2)Owner.transform.position;
     }
 
     public override void Update()
     {
-        if (Context.HomePoint == null)
+        if (!Context.HasHome)
             return;
 
         Vector2 dir = patrolPoint - (Vector2)Owner.transform.position;
         if (dir.magnitude <= Owner.TargetReachThreshold)
         {
-            patrolPoint = (Vector2)Context.HomePoint.transform.position + Random.insideUnitCircle.normalized * 1.5f;
+            patrolPoint = Context.HomePosition + Random.insideUnitCircle.normalized * 1.5f;
             return;
         }
 
@@ -183,10 +183,10 @@ public class ReturnHomeState : AIState
 
     public override void Update()
     {
-        if (Context.HomePoint == null)
+        if (!Context.HasHome)
             return;
 
-        Vector2 dir = ((Vector2)Context.HomePoint.transform.position - (Vector2)Owner.transform.position).normalized;
+        Vector2 dir = (Context.HomePosition - (Vector2)Owner.transform.position).normalized;
         SetMovementDirection(dir);
     }
 }

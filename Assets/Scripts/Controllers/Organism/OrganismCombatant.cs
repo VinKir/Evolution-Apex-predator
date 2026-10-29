@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public struct AttackPacket
 {
@@ -90,15 +91,12 @@ public struct OrganismRuntimeStats
 public class OrganismCombatant : MonoBehaviour
 {
     [Header("Mode")]
-    [SerializeField] private bool isPlayer = true;
     [SerializeField] private int factionGroupId = 0;
 
     [Header("Progression")]
     [SerializeField] private OrganismProgression progression;
-    [SerializeField] private PlayerBody playerBody;
-
-    [Header("Enemy Source")]
-    [SerializeField] private EnemyTemplateSO enemyTemplate;
+    [FormerlySerializedAs("playerBody")]
+    [SerializeField] private OrganismBody body;
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
@@ -115,6 +113,7 @@ public class OrganismCombatant : MonoBehaviour
 
     [Header("Death Drop")]
     [SerializeField] private float corpseBiomassMultiplier = 1f;
+    [SerializeField, Min(0.01f)] private float corpseConsumeDuration = 10f;
 
     public OrganismRuntimeStats Stats { get; private set; }
     public Transform StatusBarAnchor => statusBarAnchor;
@@ -149,6 +148,7 @@ public class OrganismCombatant : MonoBehaviour
     private bool attackAnimatorSpeedAdjusted;
     private readonly List<Coroutine> runningCoroutines = new();
     private bool statsInitialized = false;
+    private int bleedGeneration;
 
     private Transform graphicsChitin;
     private Transform graphicsJaws;
@@ -182,7 +182,10 @@ public class OrganismCombatant : MonoBehaviour
 
         if (progression == null)
             progression = GetComponent<OrganismProgression>();
-        
+
+        if (body == null)
+            body = GetComponent<OrganismBody>();
+
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
 
@@ -280,8 +283,8 @@ public class OrganismCombatant : MonoBehaviour
         if (progression != null)
             progression.OnEvolve += RecalculateStats;
 
-        if (isPlayer && playerBody != null)
-            playerBody.OnBodyChanged += RecalculateStats;
+        if (body != null)
+            body.OnBodyChanged += RecalculateStats;
     }
 
     private void UnhookSources()
@@ -289,21 +292,32 @@ public class OrganismCombatant : MonoBehaviour
         if (progression != null)
             progression.OnEvolve -= RecalculateStats;
 
-        if (isPlayer && playerBody != null)
-            playerBody.OnBodyChanged -= RecalculateStats;
+        if (body != null)
+            body.OnBodyChanged -= RecalculateStats;
     }
 
-    public void ConfigureEnemy(EnemyTemplateSO template, int level, EvolutionSO evolution, int groupId)
+    public void ConfigureEnemy(int level, EnemyBuild build, int groupId)
     {
-        isPlayer = false;
-        enemyTemplate = template;
         factionGroupId = groupId;
 
         if (progression == null)
-            progression = GetComponent<OrganismProgression>() ?? gameObject.AddComponent<OrganismProgression>();
-        progression.OnEvolve -= RecalculateStats;
-        progression.OnEvolve += RecalculateStats;
-        progression.InitializeRuntime(level, evolution);
+        {
+            Debug.LogWarning($"Enemy '{name}' needs OrganismProgression", this);
+            return;
+        }
+
+        progression.InitializeRuntime(
+            level,
+            build.evolution,
+            build.strengthExt,
+            build.strengthInt,
+            build.enduranceExt,
+            build.enduranceInt);
+
+        if (body != null)
+            body.ReplaceParts(build.parts);
+        else if (build.parts.Count > 0)
+            Debug.LogWarning($"Enemy '{name}' has no OrganismBody, generated organs are skipped", this);
 
         RecalculateStats();
     }
@@ -344,12 +358,7 @@ public class OrganismCombatant : MonoBehaviour
 
     private OrganismRuntimeStats BuildStats()
     {
-        IReadOnlyList<PlayerBody.BodyPartRuntimeState> states;
-        if (isPlayer) // TODO: переделать playerBody в organismBody, чтоб из одного места у всех существ брались части тела
-            states=playerBody?.States;
-        else
-            states=enemyTemplate?.bodyParts;
-        return OrganismStatsCalculator.Calculate(progression, states, EvolutionStage);
+        return OrganismStatsCalculator.Calculate(progression, body != null ? body.States : null, EvolutionStage);
     }
 
     private void UpdateChitinVisuals()
@@ -720,11 +729,16 @@ public class OrganismCombatant : MonoBehaviour
     {
         const float tickInterval = CombatSettings.BleedingTickInterval;
         float elapsed = 0f;
+        int generation = bleedGeneration;
 
         while (elapsed < duration && !IsDead)
         {
             yield return new WaitForSeconds(tickInterval);
             elapsed += tickInterval;
+
+            // RestoreFull cancels all running bleeds
+            if (generation != bleedGeneration)
+                yield break;
 
             switch (slot)
             {
@@ -798,6 +812,36 @@ public class OrganismCombatant : MonoBehaviour
         CurrentBodyHp = Mathf.Min(Stats.maxBodyHp, CurrentBodyHp + amount);
         
         OnBodyHpChanged?.Invoke();
+    }
+
+    public void RestoreFull()
+    {
+        if (IsDead)
+            return;
+
+        bleedGeneration++;
+
+        CurrentChitinHp = Stats.maxChitinHp;
+        CurrentBodyHp = Stats.maxBodyHp;
+        CurrentJawsHp = Stats.maxJawHp;
+        CurrentLeftLegHp = Stats.maxLegHp;
+        CurrentRightLegHp = Stats.maxLegHp;
+        CurrentStamina = Stats.maxStamina;
+
+        if (jawsDisabled)
+            EnablePart(BodyPartType.Jaws);
+
+        if (legsDisabled)
+            EnablePart(BodyPartType.Legs);
+
+        if (chitinDisabled)
+            EnablePart(BodyPartType.Chitin);
+
+        OnChitinHpChanged?.Invoke();
+        OnBodyHpChanged?.Invoke();
+        OnJawsHpChanged?.Invoke();
+        OnLegsHpChanged?.Invoke();
+        OnStaminaChanged?.Invoke();
     }
 
     private void HealMostDamagedPart(float amount)
@@ -1056,7 +1100,7 @@ public class OrganismCombatant : MonoBehaviour
                 corpseScale.x * Stats.sizeMultiplier,
                 corpseScale.y * Stats.sizeMultiplier,
                 corpseScale.z);
-            corpse.InitializeRuntime(biomass, 10f);
+            corpse.InitializeRuntime(biomass, corpseConsumeDuration);
         }
 
         OnDied?.Invoke();

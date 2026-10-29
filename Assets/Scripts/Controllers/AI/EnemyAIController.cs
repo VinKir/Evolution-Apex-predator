@@ -16,8 +16,10 @@ public class EnemyAIController : MonoBehaviour
     [SerializeField] private float wanderChangeInterval = 2.5f;
     [SerializeField] private float targetReachThreshold = 0.15f;
 
-    public bool IsRoamingEnemy { get; private set; }
-    public EnemySpawnPoint BasePoint { get; private set; }
+    public bool HasHome { get; private set; }
+    public Vector2 HomePosition { get; private set; }
+    public float HomeRadius { get; private set; }
+    public bool ForceReturnHome { get; set; }
     public OrganismCombatant Combatant => combatant;
     public OrganismMovementMotor Movement => movement;
     public OrganismBehaviourType BehaviourType => behaviourType;
@@ -45,16 +47,29 @@ public class EnemyAIController : MonoBehaviour
         memory = new AIMemory();
         brain = new OrganismBrain();
         stateMachine = new AIStateMachine(this, context, memory);
-    }
-
-    public void Initialize(Transform playerTarget, EnemySpawnPoint basePoint)
-    {
-        player = playerTarget;
-        BasePoint = basePoint;
-        IsRoamingEnemy = basePoint == null;
 
         if (combatant != null)
             combatant.OnDamagedBy += OnDamagedBy;
+    }
+
+    public void Initialize(Transform playerTarget, bool hasHome, Vector2 homePosition, float homeRadius)
+    {
+        player = playerTarget;
+        HasHome = hasHome;
+        HomePosition = homePosition;
+        HomeRadius = homeRadius;
+    }
+
+    // Stops thinking and moving until Initialize is called again.
+    public void Deactivate()
+    {
+        player = null;
+        ForceReturnHome = false;
+        memory.LastAttacker = null;
+        stateMachine.ChangeState(AIStateType.Idle);
+
+        if (movement != null)
+            movement.Stop();
     }
 
     private void OnDestroy()

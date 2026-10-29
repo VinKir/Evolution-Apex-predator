@@ -12,6 +12,9 @@ public class OrganismBrain
         if (context.Combatant.IsDead)
             return AIStateType.Dead;
 
+        if (context.ForceReturnHome && context.HasHome)
+            return AIStateType.ReturnHome;
+
         if (context.BehaviourType == OrganismBehaviourType.Scavenger)
         {
             if (ownerWasAttacked(context, memory))
@@ -27,16 +30,16 @@ public class OrganismBrain
         {
             if (ownerWasAttacked(context, memory))
             {
-                if (context.HomePoint != null && context.DistanceToHome > context.HomeRadius * 0.8f)
+                if (context.HasHome && context.DistanceToHome > context.HomeRadius * 0.8f)
                     return AIStateType.ReturnHome;
 
                 return AIStateType.Fight;
             }
 
-            if (context.HomePoint != null && !context.IsHome)
+            if (context.HasHome && !context.IsHome)
                 return AIStateType.ReturnHome;
 
-            if (context.HomePoint != null && context.VisibleEnemies.Count == 0)
+            if (context.HasHome && context.VisibleEnemies.Count == 0)
                 return AIStateType.Patrol;
 
             if (context.HasThreat && context.CurrentThreat != null)

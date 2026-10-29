@@ -12,7 +12,7 @@ public class BodyVisualController : MonoBehaviour
         public Transform overlayRoot;
     }
 
-    [SerializeField] private PlayerBody body;
+    [SerializeField] private OrganismBody body;
     [SerializeField] private List<VisualSlot> slots = new();
 
     private readonly List<SpriteRenderer> transactionOverlays = new();
@@ -31,7 +31,7 @@ public class BodyVisualController : MonoBehaviour
             body.OnBodyChanged -= RebuildFromBody;
     }
 
-    public void SetBody(PlayerBody targetBody)
+    public void SetBody(OrganismBody targetBody)
     {
         if (body != null)
             body.OnBodyChanged -= RebuildFromBody;

@@ -37,5 +37,6 @@ MonoBehaviour:
   nextEvolutions:
   - {fileID: 11400000, guid: 8484279b9fd09da45bbcb86f6ab1caaa, type: 2}
   - {fileID: 11400000, guid: af9badfc402a83b448c5010daa08d03e, type: 2}
+  previousEvolutions: []
   requirements: []
   evolutionDuration: 10

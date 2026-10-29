@@ -9,7 +9,7 @@ public class AchievementRequirementSO : EvolutionRequirementSO
 
     public override bool IsMet(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         return progression != null &&
                progression.HasAchievementFlag(flagId);
@@ -17,7 +17,7 @@ public class AchievementRequirementSO : EvolutionRequirementSO
 
     public override string GetDescription(
         OrganismProgression progression,
-        PlayerBody body)
+        OrganismBody body)
     {
         return $"Достижение: {flagId}";
     }

@@ -1,38 +1,66 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    private class SpawnedEnemy
+    {
+        public EnemyAIController ai;
+        public OrganismCombatant combatant;
+        public EnemySpawnZone zone;
+        public OrganismCombatant lastAttacker;
+    }
+
     [Header("Player")]
     [SerializeField] private Transform player;
 
-    [Header("Templates")]
-    [SerializeField] private List<EnemyTemplateSO> scavengerTemplates = new();
-    [SerializeField] private List<EnemyTemplateSO> predatorTemplates = new();
-    [SerializeField] private List<EnemyTemplateSO> guardianTemplates = new();
+    [Header("Spawning")]
+    [SerializeField] private float tickInterval = 0.5f;
+    [Tooltip("Слои стен и препятствий: точка спавна не должна их задевать")]
+    [SerializeField] private LayerMask obstacleMask;
+    [SerializeField] private int spawnPointAttempts = 12;
 
-    [Header("Spawn Points")]
-    [SerializeField] private List<EnemySpawnPoint> spawnPoints = new();
+    [Header("Distances")]
+    [Tooltip("Камера, за пределами обзора которой появляются враги. Пусто = Camera.main")]
+    [SerializeField] private Camera viewCamera;
+    [Tooltip("Запас за углом экрана для минимальной дистанции спавна")]
+    [SerializeField, Min(0f)] private float offscreenMargin = 2f;
+    [Tooltip("Деспавн = минимальная дистанция спавна + этот запас. Спавн идёт в первой половине запаса")]
+    [SerializeField, Min(0f)] private float despawnBuffer = 15f;
 
-    [Header("Roaming Spawn")]
-    [SerializeField] private float roamSpawnInterval = 8f;
-    [SerializeField] private int maxRoamingEnemies = 20;
-    [SerializeField] private float roamMinSpawnDistance = 12f;
-    [SerializeField] private float roamMaxSpawnDistance = 24f;
+    // Half-diagonal of the camera view plus a margin, so enemies never appear on screen
+    public float MinSpawnDistance
+    {
+        get
+        {
+            var cam = viewCamera != null ? viewCamera : Camera.main;
+            if (cam == null)
+                return offscreenMargin;
 
-    [Header("Culling")]
-    [SerializeField] private float despawnDistance = 45f;
+            return cam.orthographicSize * Mathf.Sqrt(1f + cam.aspect * cam.aspect) + offscreenMargin;
+        }
+    }
 
-    [Header("Temp")]
-    [SerializeField] private EvolutionSO evolution;
+    // Spawning stops halfway through the buffer, so a fresh enemy isn't culled after one step outward
+    public float MaxSpawnDistance => MinSpawnDistance + despawnBuffer * 0.5f;
+    public float DespawnDistance => MinSpawnDistance + despawnBuffer;
 
-    private float nextRoamSpawnTime;
+    private readonly List<SpawnedEnemy> spawnedEnemies = new();
+    private readonly HashSet<EnemySpawnZone.EnemySpawnEntry> warnedEntries = new();
+    private List<EnemySpawnZone> zones = new();
+    private OrganismProgression playerProgression;
+    private OrganismCombatant playerCombatant;
+    private float nextTickTime;
 
     private void Start()
     {
-        if (spawnPoints == null || spawnPoints.Count == 0)
-            spawnPoints = FindObjectsByType<EnemySpawnPoint>().ToList();
+        zones = new List<EnemySpawnZone>(FindObjectsByType<EnemySpawnZone>());
+
+        if (player != null)
+        {
+            playerProgression = player.GetComponent<OrganismProgression>();
+            playerCombatant = player.GetComponent<OrganismCombatant>();
+        }
     }
 
     private void Update()
@@ -40,124 +68,160 @@ public class EnemySpawner : MonoBehaviour
         if (player == null)
             return;
 
-        CullFarEnemies();
-
-        if (Time.time >= nextRoamSpawnTime)
-        {
-            TrySpawnRoamers();
-            nextRoamSpawnTime = Time.time + roamSpawnInterval;
-        }
-
-        TrySpawnGuardiansNearBases();
-    }
-
-    private void TrySpawnRoamers()
-    {
-        int currentRoamers = FindObjectsByType<EnemyAIController>().Count(e => e.IsRoamingEnemy);
-        if (currentRoamers >= maxRoamingEnemies)
+        if (Time.time < nextTickTime)
             return;
 
-        var template = PickRandom(scavengerTemplates.Concat(predatorTemplates).ToList());
-        if (template == null || template.prefab == null)
+        nextTickTime = Time.time + tickInterval;
+
+        CullFarEnemies(DespawnDistance);
+        TrySpawnInZones(MinSpawnDistance, MaxSpawnDistance);
+    }
+
+    private void TrySpawnInZones(float minSpawnDistance, float maxSpawnDistance)
+    {
+        Vector2 playerPosition = player.position;
+
+        foreach (var zone in zones)
+        {
+            if (zone == null)
+                continue;
+
+            zone.IsDisabled = zone.IsDisabledFor(playerProgression);
+            if (zone.IsDisabled)
+                continue;
+
+            // The zone doesn't reach the spawn ring
+            if (zone.DistanceToEdge(playerPosition) > maxSpawnDistance)
+                continue;
+
+            if (!zone.CanSpawnNow)
+                continue;
+
+            if (TryFindSpawnPoint(zone, playerPosition, minSpawnDistance, maxSpawnDistance, out Vector2 spawnPosition))
+                SpawnEnemy(zone, spawnPosition);
+        }
+    }
+
+    private bool TryFindSpawnPoint(EnemySpawnZone zone, Vector2 playerPosition, float minSpawnDistance, float maxSpawnDistance, out Vector2 spawnPosition)
+    {
+        for (int attempt = 0; attempt < spawnPointAttempts; attempt++)
+        {
+            if (!zone.TryGetRandomPoint(playerPosition, minSpawnDistance, maxSpawnDistance, out spawnPosition))
+                continue;
+
+            if (obstacleMask != 0 && Physics2D.OverlapCircle(spawnPosition, zone.spawnClearance, obstacleMask) != null)
+                continue;
+
+            return true;
+        }
+
+        spawnPosition = default;
+        return false;
+    }
+
+    private void SpawnEnemy(EnemySpawnZone zone, Vector2 position)
+    {
+        var entry = zone.PickEntry();
+        if (entry == null)
             return;
 
-        Vector2 spawnPos = RandomPointAroundPlayer(roamMinSpawnDistance, roamMaxSpawnDistance);
-        SpawnEnemy(template, spawnPos, null);
+        var evolution = entry.PickEvolution();
+        if (evolution == null)
+        {
+            if (warnedEntries.Add(entry))
+                Debug.LogWarning($"EnemySpawnZone '{zone.name}': entry '{entry.prefab.name}' has no evolutions, skipped", zone);
+            return;
+        }
+
+        // OrganismProgression.InitializeRuntime clamps the level to the evolution's cap
+        int level = Random.Range(zone.minLevel, zone.maxLevel + 1);
+        int groupId = zone.factionGroupId != 0 ? zone.factionGroupId : Random.Range(1000, 9999);
+
+        var ai = Instantiate(entry.prefab, position, Quaternion.identity);
+        var combatant = ai.Combatant;
+
+        if (combatant == null)
+        {
+            Debug.LogWarning($"Enemy prefab '{entry.prefab.name}' needs OrganismCombatant", entry.prefab);
+            Destroy(ai.gameObject);
+            return;
+        }
+
+        combatant.ConfigureEnemy(level, EnemyGenerator.Generate(evolution, zone.dangerModificator), groupId);
+        ai.Initialize(player, zone.guardHome, zone.transform.position, zone.homeRadius);
+
+        var spawned = new SpawnedEnemy { ai = ai, combatant = combatant, zone = zone };
+        combatant.OnDamagedBy += attacker => spawned.lastAttacker = attacker;
+        combatant.OnDied += () => OnEnemyDied(spawned);
+
+        spawnedEnemies.Add(spawned);
+        zone.Register();
     }
 
-    private void TrySpawnGuardiansNearBases()
+    private void OnEnemyDied(SpawnedEnemy spawned)
     {
-        foreach (var point in spawnPoints.Where(p => p != null && p.isBase))
+        if (!spawnedEnemies.Remove(spawned))
+            return;
+
+        var zone = spawned.zone;
+        if (zone == null)
+            return;
+
+        zone.Unregister(died: true);
+
+        if (!zone.countKills)
+            return;
+
+        bool killedByPlayer = playerCombatant != null && spawned.lastAttacker == playerCombatant;
+        if (zone.killCountMode == EnemySpawnZone.KillCountMode.PlayerOnly && !killedByPlayer)
+            return;
+
+        if (zone.AddKill() && playerProgression != null)
+            playerProgression.SetAchievementFlag(zone.killRewardFlag);
+    }
+
+    private void CullFarEnemies(float despawnDistance)
+    {
+        Vector2 playerPosition = player.position;
+
+        for (int index = spawnedEnemies.Count - 1; index >= 0; index--)
         {
-            if (player == null)
+            var spawned = spawnedEnemies[index];
+
+            // Destroyed outside of Die(), e.g. by another script
+            if (spawned.ai == null)
+            {
+                spawnedEnemies.RemoveAt(index);
+                if (spawned.zone != null)
+                    spawned.zone.Unregister(died: false);
+                continue;
+            }
+
+            if (Vector2.Distance(playerPosition, spawned.ai.transform.position) <= despawnDistance)
                 continue;
 
-            if (Vector2.Distance(player.position, point.transform.position) > point.activationRadius)
-                continue;
+            spawnedEnemies.RemoveAt(index);
+            if (spawned.zone != null)
+                spawned.zone.Unregister(died: false);
 
-            int current = FindObjectsByType<EnemyAIController>()
-                .Count(e => e.BasePoint == point && !e.IsRoamingEnemy);
-
-            if (current >= point.maxGuardians)
-                continue;
-
-            var template = point.guardianTemplate != null ? point.guardianTemplate : PickRandom(guardianTemplates);
-            if (template == null || template.prefab == null)
-                continue;
-
-            Vector2 pos = (Vector2)point.transform.position + Random.insideUnitCircle.normalized * point.spawnRadius;
-            SpawnEnemy(template, pos, point);
+            Destroy(spawned.ai.gameObject);
         }
     }
 
-    private void SpawnEnemy(EnemyTemplateSO template, Vector2 position, EnemySpawnPoint basePoint)
+    private void OnDrawGizmosSelected()
     {
-        var go = Instantiate(template.prefab, position, Quaternion.identity);
-        var combatant = go.GetComponent<OrganismCombatant>();
-        var ai = go.GetComponent<EnemyAIController>();
+        if (player == null)
+            return;
 
-        if (combatant != null)
-        {
-            int level = Random.Range(
-                Mathf.Max(1, PlayerLevel() + template.minLevelOffset),
-                Mathf.Max(2, PlayerLevel() + template.maxLevelOffset + 1)
-            );
+        Vector3 center = player.position;
 
-            EvolutionSO _evolution = evolution; // TODO: брать какие-то эволюции в пределах игрока с некоторым разбросом и шансом - или в зависимости от региона
+        Gizmos.color = new Color(0.3f, 1f, 0.3f, 1f);
+        Gizmos.DrawWireSphere(center, MinSpawnDistance);
 
-            int groupId = basePoint != null ? basePoint.factionGroupId : Random.Range(1000, 9999);
+        Gizmos.color = new Color(1f, 0.85f, 0.2f, 1f);
+        Gizmos.DrawWireSphere(center, MaxSpawnDistance);
 
-            combatant.ConfigureEnemy(template, level, _evolution, groupId);
-        }
-
-        if (ai != null)
-        {
-            ai.Initialize(player, basePoint);
-        }
-    }
-
-    private void CullFarEnemies()
-    {
-        foreach (var enemy in FindObjectsByType<EnemyAIController>())
-        {
-            if (enemy == null)
-                continue;
-
-            if (Vector2.Distance(player.position, enemy.transform.position) > despawnDistance)
-                Destroy(enemy.gameObject);
-        }
-    }
-
-    private Vector2 RandomPointAroundPlayer(float minDist, float maxDist)
-    {
-        Vector2 dir = Random.insideUnitCircle.normalized;
-        float dist = Random.Range(minDist, maxDist);
-        return (Vector2)player.position + dir * dist;
-    }
-
-    private IEnumerable<EnemyTemplateSO> roamingTemplates()
-    {
-        foreach (var t in scavengerTemplates) yield return t;
-        foreach (var t in predatorTemplates) yield return t;
-    }
-
-    private EnemyTemplateSO PickRandom(List<EnemyTemplateSO> list)
-    {
-        if (list == null || list.Count == 0)
-            return null;
-
-        return list[Random.Range(0, list.Count)];
-    }
-
-    private int PlayerLevel()
-    {
-        var p = player != null ? player.GetComponent<OrganismProgression>() : null;
-        return p != null ? p.Level : 1;
-    }
-
-    private int PlayerEvo()
-    {
-        var p = player != null ? player.GetComponent<OrganismProgression>() : null;
-        return p != null ? p.EvolutionStage : 1;
+        Gizmos.color = new Color(1f, 0.2f, 0.2f, 1f);
+        Gizmos.DrawWireSphere(center, DespawnDistance);
     }
 }

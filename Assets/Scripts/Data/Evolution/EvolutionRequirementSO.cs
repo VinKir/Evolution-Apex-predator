@@ -4,9 +4,9 @@ public abstract class EvolutionRequirementSO : ScriptableObject
 {
     public abstract bool IsMet(
         OrganismProgression progression,
-        PlayerBody body);
+        OrganismBody body);
 
     public abstract string GetDescription(
         OrganismProgression progression,
-        PlayerBody body);
+        OrganismBody body);
 }
